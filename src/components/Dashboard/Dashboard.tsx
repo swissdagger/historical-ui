@@ -206,7 +206,8 @@ const Dashboard: React.FC = () => {
                                 <ul className="list-disc list-inside space-y-1 text-sm">
                                     <li><strong>Required columns:</strong> datetime, open, high, low, close</li>
                                     <li><strong>Datetime formats:</strong> YYYY-MM-DD HH:mm:ss, DD-MM-YYYY HH:mm:ss, MM-DD-YYYY HH:mm:ss, DD/MM/YYYY HH:mm:ss, or MM/DD/YYYY HH:mm:ss</li>
-                                    <li><strong>Optional prediction columns:</strong> chain_detected_1m, chain_detected_3m, chain_detected_5m, chain_detected_15m</li>
+                                    <li><strong>Optional prediction columns:</strong> chain_detected_{'{'}number{'}{'}unit{'}'} where unit is s (seconds), m (minutes), or h (hours)</li>
+                                    <li><strong>Examples:</strong> chain_detected_30s, chain_detected_1m, chain_detected_5m, chain_detected_15m, chain_detected_1h</li>
                                     <li><strong>Prediction values:</strong> -1 (negative), 0 (neutral), or 1 (positive)</li>
                                 </ul>
                             </div>

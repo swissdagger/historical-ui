@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
 import { CandlestickData, ChartContainerProps, PredictionEntry, ArrowPosition } from '../../types';
 import { fetchKlineData, subscribeToUpdates, getCurrentData, parseAndValidateTimeframeInput, calculateDataLimit } from '../../api/binanceAPI';
-import { subscribeToPredictionUpdates, getCurrentPredictions, subscribeToViewUpdates, SUPPORTED_PREDICTION_INTERVALS } from '../../api/sumtymeAPI';
+import { subscribeToPredictionUpdates, getCurrentPredictions, subscribeToViewUpdates, getAvailableTimeframes } from '../../api/sumtymeAPI';
 import PredictionArrow from './PredictionArrow';
 
 const formatDateTime = (timestamp: number): string => {
@@ -300,7 +300,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const predictionsByTimeframe: Record<string, PredictionEntry[]> = {};
 
         // Include predictions from all timeframes, including those with value 0
-        SUPPORTED_PREDICTION_INTERVALS.forEach(interval => {
+        const availableTimeframes = getAvailableTimeframes(symbol);
+        availableTimeframes.forEach(interval => {
             const intervalPredictions = getCurrentPredictions(interval, showHistoricalPerformance, symbol);
             // Get ALL predictions including 0s from the service
             predictionsByTimeframe[interval] = intervalPredictions.sort((a, b) =>
@@ -734,7 +735,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
                 // Update predictions based on whether the current timeframe supports predictions
                 const allPredictions: PredictionEntry[] = [];
-                SUPPORTED_PREDICTION_INTERVALS.forEach(interval => {
+                const availableTimeframes = getAvailableTimeframes(symbol);
+                availableTimeframes.forEach(interval => {
                     const intervalPredictions = getCurrentPredictions(interval, showHistoricalPerformance, symbol);
                     allPredictions.push(...intervalPredictions);
                 });
@@ -742,9 +744,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 console.log('[ChartContainer] Initial predictions loaded:', {
                     symbol,
                     timeframe: timeframe.binanceInterval,
+                    availableTimeframes,
                     totalPredictions: allPredictions.length,
                     nonZero: allPredictions.filter(p => p.value !== 0).length,
-                    byTimeframe: SUPPORTED_PREDICTION_INTERVALS.map(interval => ({
+                    byTimeframe: availableTimeframes.map(interval => ({
                         interval,
                         count: allPredictions.filter(p => p.timeframeId === interval).length,
                         nonZero: allPredictions.filter(p => p.timeframeId === interval && p.value !== 0).length
@@ -778,7 +781,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
                 // Update predictions based on whether the current timeframe supports predictions
                 const allPredictions: PredictionEntry[] = [];
-                SUPPORTED_PREDICTION_INTERVALS.forEach(interval => {
+                const availableTimeframes = getAvailableTimeframes(symbol);
+                availableTimeframes.forEach(interval => {
                     const intervalPredictions = getCurrentPredictions(interval, showHistoricalPerformance, symbol);
                     allPredictions.push(...intervalPredictions);
                 });
@@ -789,11 +793,12 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         });
 
         const unsubscribePredictions = subscribeToPredictionUpdates((newPredictions, updatedTimeframeId, ticker) => {
-            if (SUPPORTED_PREDICTION_INTERVALS.includes(updatedTimeframeId) && ticker === symbol) {
+            const availableTimeframes = getAvailableTimeframes(symbol);
+            if (availableTimeframes.includes(updatedTimeframeId) && ticker === symbol) {
                 // Use setTimeout to debounce and let chart data update first
                 setTimeout(() => {
                     const allPredictions: PredictionEntry[] = [];
-                    SUPPORTED_PREDICTION_INTERVALS.forEach(interval => {
+                    availableTimeframes.forEach(interval => {
                         const intervalPredictions = getCurrentPredictions(interval, showHistoricalPerformance, symbol);
                         allPredictions.push(...intervalPredictions);
                     });
@@ -818,7 +823,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     // Update predictions when showHistoricalPerformance changes
     useEffect(() => {
         const allPredictions: PredictionEntry[] = [];
-        SUPPORTED_PREDICTION_INTERVALS.forEach(interval => {
+        const availableTimeframes = getAvailableTimeframes(symbol);
+        availableTimeframes.forEach(interval => {
             const intervalPredictions = getCurrentPredictions(interval, showHistoricalPerformance, symbol);
             allPredictions.push(...intervalPredictions);
         });

@@ -12,10 +12,10 @@ let currentSixteenTimesMode = false;
 
 const initializeTickerCache = (ticker: string) => {
     if (!predictionCache[ticker]) {
-        predictionCache[ticker] = { '1m': [], '3m': [], '5m': [], '15m': [] };
+        predictionCache[ticker] = {};
     }
     if (!sixteenTimesPredictionCache[ticker]) {
-        sixteenTimesPredictionCache[ticker] = { '1m': [], '3m': [], '5m': [], '15m': [] };
+        sixteenTimesPredictionCache[ticker] = {};
     }
 };
 
@@ -72,6 +72,13 @@ export const getCurrentPredictions = (timeframeId: string, useSixteenTimes: bool
     return (cacheToUse[ticker] && cacheToUse[ticker][timeframeId]) ? cacheToUse[ticker][timeframeId] : [];
 };
 
+export const getAvailableTimeframes = (ticker: string): string[] => {
+    if (!predictionCache[ticker]) {
+        return [];
+    }
+    return Object.keys(predictionCache[ticker]);
+};
+
 export const loadPredictionsForTicker = (ticker: string) => {
     const allPredictions = getCSVPredictions(ticker);
 
@@ -82,7 +89,10 @@ export const loadPredictionsForTicker = (ticker: string) => {
 
     initializeTickerCache(ticker);
 
-    ['1m', '3m', '5m', '15m'].forEach(timeframe => {
+    const uniqueTimeframes = [...new Set(allPredictions.map(p => p.timeframeId))];
+    console.log('[Prediction Service] Discovered timeframes:', uniqueTimeframes);
+
+    uniqueTimeframes.forEach(timeframe => {
         const timeframePredictions = allPredictions.filter(p => p.timeframeId === timeframe);
         predictionCache[ticker][timeframe] = timeframePredictions;
         sixteenTimesPredictionCache[ticker][timeframe] = timeframePredictions;

@@ -1,5 +1,10 @@
 import { CandlestickData, PredictionEntry } from '../types';
 
+export const isValidTimeframeFormat = (timeframe: string): boolean => {
+  const timeframePattern = /^\d+[smh]$/;
+  return timeframePattern.test(timeframe);
+};
+
 export interface ParsedCSVRow {
   datetime: Date;
   open: number;
@@ -198,16 +203,25 @@ export function parseCSVText(text: string): CSVParseResult {
     const closeIdx = headers.indexOf('close');
 
     const predictionColumns: { index: number; timeframe: string }[] = [];
+    const invalidTimeframes: string[] = [];
+
     headers.forEach((header, idx) => {
       if (header.startsWith('chain_detected_')) {
         const timeframe = header.replace('chain_detected_', '');
-        predictionColumns.push({ index: idx, timeframe });
+
+        if (isValidTimeframeFormat(timeframe)) {
+          predictionColumns.push({ index: idx, timeframe });
+        } else {
+          invalidTimeframes.push(timeframe);
+          console.warn(`[CSV Parser] Invalid timeframe format: "${timeframe}" - must be {number}{s|m|h}`);
+        }
       }
     });
 
     console.log('[CSV Parser] Detected columns:', {
       allHeaders: headers,
-      predictionColumns: predictionColumns.map(pc => ({ timeframe: pc.timeframe, index: pc.index }))
+      predictionColumns: predictionColumns.map(pc => ({ timeframe: pc.timeframe, index: pc.index })),
+      invalidTimeframes: invalidTimeframes.length > 0 ? invalidTimeframes : 'none'
     });
 
     const availableTimeframes = predictionColumns.map(pc => pc.timeframe);

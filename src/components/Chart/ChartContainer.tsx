@@ -400,33 +400,51 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const priceScaleWidth = rightPriceScale.width();
         const maxX = totalWidth - priceScaleWidth - 9;
 
-        // Filter predictions to show only signal changes
-        const predictionsToShow = showAllInsights
-            ? predictions.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol)
-            : filterSignalChanges(
-                predictions.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol)
-            );
+        const filteredPredictions = predictions.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol);
 
-        // Get change ending periods
+        console.log('ChartContainer - calculateArrowPositions:', {
+            totalPredictions: predictions.length,
+            filteredPredictions: filteredPredictions.length,
+            symbol,
+            timeframe: timeframe.binanceInterval,
+            showAllInsights,
+            samplePredictions: filteredPredictions.slice(0, 3)
+        });
+
+        const predictionsToShow = showAllInsights
+            ? filteredPredictions
+            : filterSignalChanges(filteredPredictions);
+
+        console.log('ChartContainer - predictionsToShow:', predictionsToShow.length);
+
         const changeEndings = detectChangeEndings(predictions);
 
         const arrowPositions: ArrowPosition[] = [];
 
-        // Add signal change predictions
         predictionsToShow.forEach(prediction => {
             const timestamp = parseDateTime(prediction.datetime);
             const alignedTimestamp = getAlignedTimestamp(timestamp, timeframe.binanceInterval);
             const candlestick = currentData.find(d => d.time === alignedTimestamp);
 
-            if (!candlestick) return;
+            if (!candlestick) {
+                console.log('No candlestick found for prediction:', { prediction, alignedTimestamp, availableTimes: currentData.slice(0, 3).map(d => d.time) });
+                return;
+            }
 
             const coordinate = seriesRef.current!.priceToCoordinate(candlestick.open);
             const timeScale = chartRef.current!.timeScale();
             const timeCoordinate = timeScale.timeToCoordinate(alignedTimestamp);
 
-            if (coordinate === null || timeCoordinate === null) return;
+            if (coordinate === null || timeCoordinate === null) {
+                console.log('Coordinate null for prediction:', { prediction, coordinate, timeCoordinate });
+                return;
+            }
 
-            if (timeCoordinate >= maxX || timeCoordinate < 0) return;
+            if (timeCoordinate >= maxX || timeCoordinate < 0) {
+                return;
+            }
+
+            console.log('Adding arrow position:', { x: timeCoordinate, y: coordinate, value: prediction.value });
 
             arrowPositions.push({
                 x: timeCoordinate,
@@ -439,7 +457,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             });
         });
 
-        // Add change ending labels
         if (!showAllInsights) {
             changeEndings.forEach(ending => {
                 const timestamp = parseDateTime(ending.datetime);
@@ -459,7 +476,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 arrowPositions.push({
                     x: timeCoordinate,
                     y: coordinate,
-                    value: 0, // Special value for change ending
+                    value: 0,
                     datetime: ending.datetime,
                     timeframeId: ending.timeframeId,
                     ticker: symbol,
@@ -468,6 +485,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 });
             });
         }
+
+        console.log('ChartContainer - final arrowPositions:', arrowPositions.length);
         return arrowPositions;
     };
 

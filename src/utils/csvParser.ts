@@ -204,9 +204,11 @@ export function parseCSVText(text: string): CSVParseResult {
 
     const predictionColumns: { index: number; timeframe: string }[] = [];
     const invalidTimeframes: string[] = [];
+    const chainDetectedHeaders: string[] = [];
 
     headers.forEach((header, idx) => {
       if (header.startsWith('chain_detected_')) {
+        chainDetectedHeaders.push(header);
         const timeframe = header.replace('chain_detected_', '');
 
         if (isValidTimeframeFormat(timeframe)) {
@@ -219,7 +221,9 @@ export function parseCSVText(text: string): CSVParseResult {
     });
 
     console.log('[CSV Parser] Detected columns:', {
+      totalHeaders: headers.length,
       allHeaders: headers,
+      chainDetectedHeaders,
       predictionColumns: predictionColumns.map(pc => ({ timeframe: pc.timeframe, index: pc.index })),
       invalidTimeframes: invalidTimeframes.length > 0 ? invalidTimeframes : 'none'
     });

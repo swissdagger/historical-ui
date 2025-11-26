@@ -188,7 +188,7 @@ const Dashboard: React.FC = () => {
 
                         <div className="p-6 space-y-4 text-[#ccc] leading-relaxed">
                             <p className="text-white font-medium">
-                                This tool visualizes historical cryptocurrency data from CSV files with trend predictions.
+                                This tool visualizes historical cryptocurrency data from CSV files with forecasts from sumtyme.ai's Causal Intelligence Layer.
                             </p>
 
                             <div className="pt-4 border-t border-[#2a2a2a]">
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
                                 <ul className="list-disc list-inside space-y-1 text-sm">
                                     <li><strong>Required columns:</strong> datetime, open, high, low, close</li>
                                     <li><strong>Datetime formats:</strong> YYYY-MM-DD HH:mm:ss, DD-MM-YYYY HH:mm:ss, MM-DD-YYYY HH:mm:ss, DD/MM/YYYY HH:mm:ss, or MM/DD/YYYY HH:mm:ss</li>
-                                    <li><strong>Optional prediction columns:</strong> chain_detected_{'{'}number{'}{'}unit{'}'} where unit is s (seconds), m (minutes), or h (hours)</li>
+                                    <li><strong>Additional columns:</strong> chain_detected_{'{'}number{'}{'}unit{'}'} where unit is s (seconds), m (minutes), or h (hours)</li>
                                     <li><strong>Examples:</strong> chain_detected_30s, chain_detected_1m, chain_detected_5m, chain_detected_15m, chain_detected_1h</li>
                                     <li><strong>Prediction values:</strong> -1 (negative), 0 (neutral), or 1 (positive)</li>
                                 </ul>
@@ -208,15 +208,15 @@ const Dashboard: React.FC = () => {
                                     <li>Click "Upload CSV" to select and upload your CSV file</li>
                                     <li>Use "Files" button to manage and switch between uploaded files</li>
                                     <li>Enable "Quad View" to compare multiple CSV files side-by-side</li>
-                                    <li>Turn on "All Insights" to see all prediction points instead of just signal changes</li>
+                                    <li>Turn on "All Insights" to see all prediction points instead of just propagations</li>
                                 </ol>
                             </div>
 
                             <div className="pt-4 border-t border-[#2a2a2a]">
                                 <h3 className="text-white font-medium mb-2">Visualization</h3>
                                 <p className="text-sm">
-                                    The chart displays the open price as a line. Green dots represent positive trend predictions,
-                                    while red dots represent negative predictions. Predictions are plotted at the open price of
+                                    The chart displays the open price as a line. Green dots represent positive causal chain insights,
+                                    while red dots represent negative causal chain insights. Predictions are plotted at the open price of
                                     the corresponding candle.
                                 </p>
                             </div>

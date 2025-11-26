@@ -9,7 +9,25 @@ const getTimeframeLabel = (timeframeId: string): string => {
     return timeframe?.label || timeframeId;
 };
 
-const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker }) => {
+// Convert timeframe ID to seconds
+const timeframeToSeconds = (timeframeId: string): number => {
+    const match = timeframeId.match(/^(\d+)([smhdw])$/);
+    if (!match) return 0;
+
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+
+    switch (unit) {
+        case 's': return value;
+        case 'm': return value * 60;
+        case 'h': return value * 3600;
+        case 'd': return value * 86400;
+        case 'w': return value * 604800;
+        default: return 0;
+    }
+};
+
+const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker, allTimeframes }) => {
     const [showTooltip, setShowTooltip] = useState(false);
 
     // Don't render anything if value is 0 (no prediction)
@@ -58,16 +76,27 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         border: `1px solid ${color}`,
     };
 
-    // Calculate vertical offset based on timeframe length to stack labels at different heights
-    const getTimeframeOffset = (timeframeId: string): number => {
+    // Calculate vertical offset based on timeframe frequency ranking
+    const getTimeframeOffset = (timeframeId: string, allTimeframes: string[]): number => {
         // Base offset for all labels
         const baseOffset = 12;
-        // Additional offset based on string length (10px per character)
-        const lengthOffset = timeframeId.length * 10;
-        return baseOffset + lengthOffset;
+
+        // Convert all timeframes to seconds and sort by frequency (lowest seconds = highest frequency)
+        const sortedTimeframes = [...allTimeframes]
+            .map(tf => ({ id: tf, seconds: timeframeToSeconds(tf) }))
+            .sort((a, b) => a.seconds - b.seconds);
+
+        // Find the rank of current timeframe (0 = highest frequency)
+        const rank = sortedTimeframes.findIndex(tf => tf.id === timeframeId);
+
+        // If not found, use default offset
+        if (rank === -1) return baseOffset;
+
+        // Add 10px for each rank (0px for highest frequency, 10px for next, 20px for next, etc.)
+        return baseOffset + (rank * 10);
     };
 
-    const timeframeOffset = getTimeframeOffset(timeframeId);
+    const timeframeOffset = getTimeframeOffset(timeframeId, allTimeframes || [timeframeId]);
 
     const labelStyle: React.CSSProperties = {
         position: 'absolute',

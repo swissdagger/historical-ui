@@ -877,44 +877,50 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
                 {/* Overlay container - managed by React for PredictionArrows */}
                 <div ref={overlayContainerRef} className="absolute inset-0 p-0.5 pointer-events-none">
-                    {arrowPositions.map((position) => (
-                        position.isChangeEnding ? (
-                            // Change ending label
-                            <div
-                                key={`ending-${position.datetime}-${position.ticker}-${position.timeframeId}`}
-                                style={{
-                                    position: 'absolute',
-                                    left: `${position.x + 1}px`,
-                                    top: `${position.y - 20}px`,
-                                    transform: 'translate(-50%, -100%)',
-                                    color: '#999',
-                                    fontSize: '8px',
-                                    fontWeight: 'bold',
-                                    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
-                                    zIndex: 3,
-                                    pointerEvents: 'none',
-                                    fontFamily: 'monospace',
-                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                    padding: '2px 4px',
-                                    borderRadius: '2px',
-                                    border: '1px solid #555',
-                                    whiteSpace: 'nowrap'
-                                }}
-                                title={`Change ending period: ${position.datetime} to ${position.endTime}`}
-                            >
-                                change ending ({position.timeframeId})
-                            </div>
-                        ) : (
-                            // Regular prediction arrow
-                            <PredictionArrow
-                                key={`${position.datetime}-${position.ticker}-${position.timeframeId}`}
-                                value={position.value}
-                                position={position}
-                                timeframeId={position.timeframeId}
-                                ticker={position.ticker}
-                            />
-                        )
-                    ))}
+                    {(() => {
+                        // Extract all unique timeframes from predictions
+                        const allTimeframes = Array.from(new Set(predictions.map(p => p.timeframeId)));
+
+                        return arrowPositions.map((position) => (
+                            position.isChangeEnding ? (
+                                // Change ending label
+                                <div
+                                    key={`ending-${position.datetime}-${position.ticker}-${position.timeframeId}`}
+                                    style={{
+                                        position: 'absolute',
+                                        left: `${position.x + 1}px`,
+                                        top: `${position.y - 20}px`,
+                                        transform: 'translate(-50%, -100%)',
+                                        color: '#999',
+                                        fontSize: '8px',
+                                        fontWeight: 'bold',
+                                        textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+                                        zIndex: 3,
+                                        pointerEvents: 'none',
+                                        fontFamily: 'monospace',
+                                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                        padding: '2px 4px',
+                                        borderRadius: '2px',
+                                        border: '1px solid #555',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                    title={`Change ending period: ${position.datetime} to ${position.endTime}`}
+                                >
+                                    change ending ({position.timeframeId})
+                                </div>
+                            ) : (
+                                // Regular prediction arrow
+                                <PredictionArrow
+                                    key={`${position.datetime}-${position.ticker}-${position.timeframeId}`}
+                                    value={position.value}
+                                    position={position}
+                                    timeframeId={position.timeframeId}
+                                    ticker={position.ticker}
+                                    allTimeframes={allTimeframes}
+                                />
+                            )
+                        ));
+                    })()}
                 </div>
             </div>
         </div>

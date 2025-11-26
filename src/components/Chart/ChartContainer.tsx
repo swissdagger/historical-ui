@@ -402,20 +402,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         const filteredPredictions = predictions.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol);
 
-        console.log('ChartContainer - calculateArrowPositions:', {
-            totalPredictions: predictions.length,
-            filteredPredictions: filteredPredictions.length,
-            symbol,
-            timeframe: timeframe.binanceInterval,
-            showAllInsights,
-            samplePredictions: filteredPredictions.slice(0, 3)
-        });
-
         const predictionsToShow = showAllInsights
             ? filteredPredictions
             : filterSignalChanges(filteredPredictions);
-
-        console.log('ChartContainer - predictionsToShow:', predictionsToShow.length);
 
         const changeEndings = detectChangeEndings(predictions);
 
@@ -423,28 +412,39 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         predictionsToShow.forEach(prediction => {
             const timestamp = parseDateTime(prediction.datetime);
-            const alignedTimestamp = getAlignedTimestamp(timestamp, timeframe.binanceInterval);
-            const candlestick = currentData.find(d => d.time === alignedTimestamp);
+
+            let candlestick = currentData.find(d => d.time === timestamp);
+            let matchedTimestamp = timestamp;
 
             if (!candlestick) {
-                console.log('No candlestick found for prediction:', { prediction, alignedTimestamp, availableTimes: currentData.slice(0, 3).map(d => d.time) });
+                const candleTimes = currentData.map(d => d.time);
+                const closestIndex = candleTimes.reduce((closest, time, index) => {
+                    const currentDiff = Math.abs(time - timestamp);
+                    const closestDiff = Math.abs(candleTimes[closest] - timestamp);
+                    return currentDiff < closestDiff ? index : closest;
+                }, 0);
+
+                if (Math.abs(candleTimes[closestIndex] - timestamp) <= 300) {
+                    candlestick = currentData[closestIndex];
+                    matchedTimestamp = candleTimes[closestIndex];
+                }
+            }
+
+            if (!candlestick) {
                 return;
             }
 
             const coordinate = seriesRef.current!.priceToCoordinate(candlestick.open);
             const timeScale = chartRef.current!.timeScale();
-            const timeCoordinate = timeScale.timeToCoordinate(alignedTimestamp);
+            const timeCoordinate = timeScale.timeToCoordinate(matchedTimestamp);
 
             if (coordinate === null || timeCoordinate === null) {
-                console.log('Coordinate null for prediction:', { prediction, coordinate, timeCoordinate });
                 return;
             }
 
             if (timeCoordinate >= maxX || timeCoordinate < 0) {
                 return;
             }
-
-            console.log('Adding arrow position:', { x: timeCoordinate, y: coordinate, value: prediction.value });
 
             arrowPositions.push({
                 x: timeCoordinate,
@@ -460,14 +460,29 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         if (!showAllInsights) {
             changeEndings.forEach(ending => {
                 const timestamp = parseDateTime(ending.datetime);
-                const alignedTimestamp = getAlignedTimestamp(timestamp, timeframe.binanceInterval);
-                const candlestick = currentData.find(d => d.time === alignedTimestamp);
+
+                let candlestick = currentData.find(d => d.time === timestamp);
+                let matchedTimestamp = timestamp;
+
+                if (!candlestick) {
+                    const candleTimes = currentData.map(d => d.time);
+                    const closestIndex = candleTimes.reduce((closest, time, index) => {
+                        const currentDiff = Math.abs(time - timestamp);
+                        const closestDiff = Math.abs(candleTimes[closest] - timestamp);
+                        return currentDiff < closestDiff ? index : closest;
+                    }, 0);
+
+                    if (Math.abs(candleTimes[closestIndex] - timestamp) <= 300) {
+                        candlestick = currentData[closestIndex];
+                        matchedTimestamp = candleTimes[closestIndex];
+                    }
+                }
 
                 if (!candlestick) return;
 
                 const coordinate = seriesRef.current!.priceToCoordinate(candlestick.open);
                 const timeScale = chartRef.current!.timeScale();
-                const timeCoordinate = timeScale.timeToCoordinate(alignedTimestamp);
+                const timeCoordinate = timeScale.timeToCoordinate(matchedTimestamp);
 
                 if (coordinate === null || timeCoordinate === null) return;
 
@@ -486,7 +501,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             });
         }
 
-        console.log('ChartContainer - final arrowPositions:', arrowPositions.length);
         return arrowPositions;
     };
 

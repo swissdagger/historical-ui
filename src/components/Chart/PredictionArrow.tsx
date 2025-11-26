@@ -17,9 +17,6 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         return null;
     }
 
-    // Debug log to see what values we're getting
-    console.log('PredictionArrow rendering:', { value, position, timeframeId, ticker });
-
     // Determine if prediction is bullish (positive value) or bearish (negative value)
     const isUp = value > 0;
     const color = isUp ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)';

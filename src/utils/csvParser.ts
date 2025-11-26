@@ -199,8 +199,8 @@ export function parseCSVText(text: string): CSVParseResult {
 
     const predictionColumns: { index: number; timeframe: string }[] = [];
     headers.forEach((header, idx) => {
-      if (header.startsWith('trend_identified_')) {
-        const timeframe = header.replace('trend_identified_', '');
+      if (header.startsWith('chain_detected_')) {
+        const timeframe = header.replace('chain_detected_', '');
         predictionColumns.push({ index: idx, timeframe });
       }
     });

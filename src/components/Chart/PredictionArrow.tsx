@@ -27,7 +27,7 @@ const timeframeToSeconds = (timeframeId: string): number => {
     }
 };
 
-const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker, allTimeframes }) => {
+const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker, timeframesAtSameTime }) => {
     const [showTooltip, setShowTooltip] = useState(false);
 
     // Don't render anything if value is 0 (no prediction)
@@ -76,13 +76,18 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         border: `1px solid ${color}`,
     };
 
-    // Calculate vertical offset based on timeframe frequency ranking
-    const getTimeframeOffset = (timeframeId: string, allTimeframes: string[]): number => {
+    // Calculate vertical offset based on timeframe frequency ranking (only if multiple at same time)
+    const getTimeframeOffset = (timeframeId: string, timeframesAtSameTime: string[]): number => {
         // Base offset for all labels
         const baseOffset = 12;
 
+        // If no other timeframes at the same time, or only one timeframe, use base offset
+        if (!timeframesAtSameTime || timeframesAtSameTime.length <= 1) {
+            return baseOffset;
+        }
+
         // Convert all timeframes to seconds and sort by frequency (lowest seconds = highest frequency)
-        const sortedTimeframes = [...allTimeframes]
+        const sortedTimeframes = [...timeframesAtSameTime]
             .map(tf => ({ id: tf, seconds: timeframeToSeconds(tf) }))
             .sort((a, b) => a.seconds - b.seconds);
 
@@ -96,7 +101,7 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         return baseOffset + (rank * 10);
     };
 
-    const timeframeOffset = getTimeframeOffset(timeframeId, allTimeframes || [timeframeId]);
+    const timeframeOffset = getTimeframeOffset(timeframeId, timeframesAtSameTime || []);
 
     const labelStyle: React.CSSProperties = {
         position: 'absolute',

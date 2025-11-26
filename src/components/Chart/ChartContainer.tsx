@@ -878,48 +878,64 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 {/* Overlay container - managed by React for PredictionArrows */}
                 <div ref={overlayContainerRef} className="absolute inset-0 p-0.5 pointer-events-none">
                     {(() => {
-                        // Extract all unique timeframes from predictions
-                        const allTimeframes = Array.from(new Set(predictions.map(p => p.timeframeId)));
+                        // Group arrow positions by datetime to identify overlapping timeframes
+                        const positionsByDatetime = new Map<string, ArrowPosition[]>();
+                        arrowPositions.forEach(pos => {
+                            if (!pos.isChangeEnding) {
+                                const key = `${pos.datetime}-${pos.ticker}`;
+                                if (!positionsByDatetime.has(key)) {
+                                    positionsByDatetime.set(key, []);
+                                }
+                                positionsByDatetime.get(key)!.push(pos);
+                            }
+                        });
 
-                        return arrowPositions.map((position) => (
-                            position.isChangeEnding ? (
+                        return arrowPositions.map((position) => {
+                            if (position.isChangeEnding) {
                                 // Change ending label
-                                <div
-                                    key={`ending-${position.datetime}-${position.ticker}-${position.timeframeId}`}
-                                    style={{
-                                        position: 'absolute',
-                                        left: `${position.x + 1}px`,
-                                        top: `${position.y - 20}px`,
-                                        transform: 'translate(-50%, -100%)',
-                                        color: '#999',
-                                        fontSize: '8px',
-                                        fontWeight: 'bold',
-                                        textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
-                                        zIndex: 3,
-                                        pointerEvents: 'none',
-                                        fontFamily: 'monospace',
-                                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                        padding: '2px 4px',
-                                        borderRadius: '2px',
-                                        border: '1px solid #555',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                    title={`Change ending period: ${position.datetime} to ${position.endTime}`}
-                                >
-                                    change ending ({position.timeframeId})
-                                </div>
-                            ) : (
+                                return (
+                                    <div
+                                        key={`ending-${position.datetime}-${position.ticker}-${position.timeframeId}`}
+                                        style={{
+                                            position: 'absolute',
+                                            left: `${position.x + 1}px`,
+                                            top: `${position.y - 20}px`,
+                                            transform: 'translate(-50%, -100%)',
+                                            color: '#999',
+                                            fontSize: '8px',
+                                            fontWeight: 'bold',
+                                            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+                                            zIndex: 3,
+                                            pointerEvents: 'none',
+                                            fontFamily: 'monospace',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                            padding: '2px 4px',
+                                            borderRadius: '2px',
+                                            border: '1px solid #555',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                        title={`Change ending period: ${position.datetime} to ${position.endTime}`}
+                                    >
+                                        change ending ({position.timeframeId})
+                                    </div>
+                                );
+                            } else {
                                 // Regular prediction arrow
-                                <PredictionArrow
-                                    key={`${position.datetime}-${position.ticker}-${position.timeframeId}`}
-                                    value={position.value}
-                                    position={position}
-                                    timeframeId={position.timeframeId}
-                                    ticker={position.ticker}
-                                    allTimeframes={allTimeframes}
-                                />
-                            )
-                        ));
+                                const key = `${position.datetime}-${position.ticker}`;
+                                const timeframesAtSameTime = positionsByDatetime.get(key)?.map(p => p.timeframeId) || [];
+
+                                return (
+                                    <PredictionArrow
+                                        key={`${position.datetime}-${position.ticker}-${position.timeframeId}`}
+                                        value={position.value}
+                                        position={position}
+                                        timeframeId={position.timeframeId}
+                                        ticker={position.ticker}
+                                        timeframesAtSameTime={timeframesAtSameTime}
+                                    />
+                                );
+                            }
+                        });
                     })()}
                 </div>
             </div>

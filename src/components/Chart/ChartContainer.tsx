@@ -393,7 +393,15 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     };
 
     const calculateArrowPositions = (): ArrowPosition[] => {
-        if (!chartRef.current || !seriesRef.current || !chartContainerRef.current || currentData.length === 0) return [];
+        if (!chartRef.current || !seriesRef.current || !chartContainerRef.current || currentData.length === 0) {
+            console.log('[ChartContainer] calculateArrowPositions early return:', {
+                hasChart: !!chartRef.current,
+                hasSeries: !!seriesRef.current,
+                hasContainer: !!chartContainerRef.current,
+                dataLength: currentData.length
+            });
+            return [];
+        }
 
         const totalWidth = chartContainerRef.current.clientWidth;
         const rightPriceScale = chartRef.current.priceScale('right');
@@ -402,15 +410,33 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         const filteredPredictions = predictions.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol);
 
+        console.log('[ChartContainer] calculateArrowPositions:', {
+            totalPredictions: predictions.length,
+            symbol,
+            filteredCount: filteredPredictions.length,
+            showAllInsights,
+            currentDataRange: currentData.length > 0 ? {
+                first: currentData[0].time,
+                last: currentData[currentData.length - 1].time,
+                count: currentData.length
+            } : null
+        });
+
         const predictionsToShow = showAllInsights
             ? filteredPredictions
             : filterSignalChanges(filteredPredictions);
+
+        console.log('[ChartContainer] predictionsToShow after filtering:', predictionsToShow.length);
 
         const changeEndings = detectChangeEndings(predictions);
 
         const arrowPositions: ArrowPosition[] = [];
 
-        predictionsToShow.forEach(prediction => {
+        let matchedCount = 0;
+        let unmatchedCount = 0;
+        let outOfBoundsCount = 0;
+
+        predictionsToShow.forEach((prediction, index) => {
             const timestamp = parseDateTime(prediction.datetime);
 
             let candlestick = currentData.find(d => d.time === timestamp);
@@ -424,13 +450,26 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     return currentDiff < closestDiff ? index : closest;
                 }, 0);
 
-                if (Math.abs(candleTimes[closestIndex] - timestamp) <= 300) {
+                const timeDiff = Math.abs(candleTimes[closestIndex] - timestamp);
+
+                if (index < 3) {
+                    console.log(`[ChartContainer] Prediction ${index} matching:`, {
+                        prediction,
+                        timestamp,
+                        closestCandleTime: candleTimes[closestIndex],
+                        timeDiff,
+                        willMatch: timeDiff <= 300
+                    });
+                }
+
+                if (timeDiff <= 300) {
                     candlestick = currentData[closestIndex];
                     matchedTimestamp = candleTimes[closestIndex];
                 }
             }
 
             if (!candlestick) {
+                unmatchedCount++;
                 return;
             }
 
@@ -443,8 +482,11 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             }
 
             if (timeCoordinate >= maxX || timeCoordinate < 0) {
+                outOfBoundsCount++;
                 return;
             }
+
+            matchedCount++;
 
             arrowPositions.push({
                 x: timeCoordinate,
@@ -455,6 +497,15 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 ticker: prediction.ticker,
                 isChangeEnding: false
             });
+        });
+
+        console.log('[ChartContainer] Arrow position results:', {
+            predictionsToShow: predictionsToShow.length,
+            matchedCount,
+            unmatchedCount,
+            outOfBoundsCount,
+            finalArrowPositions: arrowPositions.length,
+            samplePositions: arrowPositions.slice(0, 3)
         });
 
         if (!showAllInsights) {
@@ -687,6 +738,20 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     const intervalPredictions = getCurrentPredictions(interval, showHistoricalPerformance, symbol);
                     allPredictions.push(...intervalPredictions);
                 });
+
+                console.log('[ChartContainer] Initial predictions loaded:', {
+                    symbol,
+                    timeframe: timeframe.binanceInterval,
+                    totalPredictions: allPredictions.length,
+                    nonZero: allPredictions.filter(p => p.value !== 0).length,
+                    byTimeframe: SUPPORTED_PREDICTION_INTERVALS.map(interval => ({
+                        interval,
+                        count: allPredictions.filter(p => p.timeframeId === interval).length,
+                        nonZero: allPredictions.filter(p => p.timeframeId === interval && p.value !== 0).length
+                    })),
+                    sample: allPredictions.filter(p => p.value !== 0).slice(0, 3)
+                });
+
                 setPredictions(allPredictions);
 
                 setViewUpdateTrigger(prev => prev + 1);

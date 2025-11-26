@@ -75,12 +75,23 @@ export const getCurrentPredictions = (timeframeId: string, useSixteenTimes: bool
 export const loadPredictionsForTicker = (ticker: string) => {
     const allPredictions = getCSVPredictions(ticker);
 
+    console.log('[Prediction Service] Loading predictions for ticker:', ticker, {
+        totalPredictions: allPredictions.length,
+        nonZero: allPredictions.filter(p => p.value !== 0).length
+    });
+
     initializeTickerCache(ticker);
 
     ['1m', '3m', '5m', '15m'].forEach(timeframe => {
         const timeframePredictions = allPredictions.filter(p => p.timeframeId === timeframe);
         predictionCache[ticker][timeframe] = timeframePredictions;
         sixteenTimesPredictionCache[ticker][timeframe] = timeframePredictions;
+
+        console.log(`[Prediction Service] Cached ${timeframe}:`, {
+            total: timeframePredictions.length,
+            nonZero: timeframePredictions.filter(p => p.value !== 0).length,
+            sample: timeframePredictions.slice(0, 2)
+        });
     });
 
     notifyPredictionsForTicker(ticker);

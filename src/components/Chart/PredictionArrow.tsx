@@ -58,15 +58,13 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         border: `1px solid ${color}`,
     };
 
-    // Calculate vertical offset based on timeframe to stack labels at different heights
+    // Calculate vertical offset based on timeframe length to stack labels at different heights
     const getTimeframeOffset = (timeframeId: string): number => {
-        switch (timeframeId) {
-            case '1m': return 12;  // Closest to dot
-            case '3m': return 20;  // 8px higher
-            case '5m': return 28;  // 16px higher
-            case '15m': return 36; // 24px higher
-            default: return 12;    // Default position
-        }
+        // Base offset for all labels
+        const baseOffset = 12;
+        // Additional offset based on string length (10px per character)
+        const lengthOffset = timeframeId.length * 10;
+        return baseOffset + lengthOffset;
     };
 
     const timeframeOffset = getTimeframeOffset(timeframeId);

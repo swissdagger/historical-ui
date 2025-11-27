@@ -208,7 +208,7 @@ const Dashboard: React.FC = () => {
                                                 <thead>
                                                     <tr className="bg-[#2a2a2a]">
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Datetime</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Trend</th>
+                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Value</th>
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Timeframe</th>
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">End Datetime</th>
                                                     </tr>
@@ -246,7 +246,7 @@ const Dashboard: React.FC = () => {
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Prop ID</th>
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Level</th>
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Datetime</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Trend</th>
+                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Value</th>
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Higher Freq</th>
                                                         <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Lower Freq</th>
                                                     </tr>

@@ -1,25 +1,23 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import ChartContainer from '../Chart/ChartContainer';
 import QuadView from './QuadView';
-import CSVUpload from '../CSVUpload/CSVUpload';
-import FileManager from '../CSVUpload/FileManager';
 import { getInitialTimeframes, calculateDataLimit, convertIntervalToMinutes } from '../../api/binanceAPI';
 import { setSixteenTimesMode, subscribeToPredictionUpdates, loadPredictionsForTicker } from '../../services/predictionService';
 import { TimeframeConfig, PredictionEntry } from '../../types';
 import { SUPPORTED_PREDICTION_INTERVALS } from '../../api/sumtymeAPI';
-import { Info, X, BarChart3, Upload, FolderOpen, Grid3x3 as Grid3X3, File } from 'lucide-react';
-import { getCSVMetadata, getAllLoadedFiles, loadCSVFile } from '../../services/csvService';
+import { Info, X, Grid3x3 as Grid3X3, File, ChevronDown } from 'lucide-react';
+import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile } from '../../services/csvService';
 import { extractTrendIndicators } from '../../utils/indicatorAnalysis';
 
 const Dashboard: React.FC = () => {
     const [currentFileId, setCurrentFileId] = useState<string>('');
-    const [showUploadModal, setShowUploadModal] = useState(false);
-    const [showFileManager, setShowFileManager] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showHistoricalPerformance, setShowHistoricalPerformance] = useState(false);
     const [showQuadView, setShowQuadView] = useState(false);
     const [showAllInsights, setShowAllInsights] = useState(false);
     const [loadedFileIds, setLoadedFileIds] = useState<string[]>([]);
+    const [availableFiles, setAvailableFiles] = useState<string[]>([]);
+    const [showFileDropdown, setShowFileDropdown] = useState(false);
 
     const [userSelectedTimeframes, setUserSelectedTimeframes] = useState<TimeframeConfig[]>(
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)
@@ -42,6 +40,23 @@ const Dashboard: React.FC = () => {
         });
         setUserSelectedTimeframes(updatedTimeframes);
     }, [showHistoricalPerformance]);
+
+    useEffect(() => {
+        const loadFiles = async () => {
+            const files = await listLocalCSVFiles();
+            setAvailableFiles(files);
+            if (files.length > 0 && !currentFileId) {
+                const firstFileId = files[0].replace(/\.csv$/i, '');
+                const result = await loadLocalCSVFile(files[0]);
+                if (result.success && result.fileId) {
+                    setCurrentFileId(result.fileId);
+                    loadPredictionsForTicker(result.fileId);
+                    setLoadedFileIds([result.fileId]);
+                }
+            }
+        };
+        loadFiles();
+    }, []);
 
     useEffect(() => {
         const unsubscribe = subscribeToPredictionUpdates((predictions, timeframeId, fileId) => {
@@ -84,29 +99,17 @@ const Dashboard: React.FC = () => {
         );
     };
 
-    const toggleHistoricalPerformance = () => {
-        setShowHistoricalPerformance(prev => !prev);
-    };
-
-    const handleUploadComplete = async (fileId: string) => {
-        const metadata = getCSVMetadata(fileId);
-        if (!metadata) return;
-
-        await loadCSVFile(fileId);
-        loadPredictionsForTicker(fileId);
-
-        if (!currentFileId) {
-            setCurrentFileId(fileId);
+    const handleFileSelect = async (filename: string) => {
+        const fileId = filename.replace(/\.csv$/i, '');
+        const result = await loadLocalCSVFile(filename);
+        if (result.success && result.fileId) {
+            setCurrentFileId(result.fileId);
+            loadPredictionsForTicker(result.fileId);
+            if (!loadedFileIds.includes(result.fileId)) {
+                setLoadedFileIds(prev => [...prev, result.fileId]);
+            }
         }
-
-        setLoadedFileIds(prev => [...prev, fileId]);
-    };
-
-    const handleFileSelect = async (fileId: string) => {
-        await loadCSVFile(fileId);
-        loadPredictionsForTicker(fileId);
-        setCurrentFileId(fileId);
-        setShowFileManager(false);
+        setShowFileDropdown(false);
     };
 
     const currentMetadata = currentFileId ? getCSVMetadata(currentFileId) : null;
@@ -122,21 +125,35 @@ const Dashboard: React.FC = () => {
         <div className="h-screen flex flex-col bg-[#1a1a1a]">
             <div className="flex items-center justify-between bg-[#1a1a1a] border-b border-[#2a2a2a] px-2 py-0.5 md:px-4 md:py-1">
                 <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => setShowUploadModal(true)}
-                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                    >
-                        <Upload size={12} />
-                        <span>Upload CSV</span>
-                    </button>
-
-                    <button
-                        onClick={() => setShowFileManager(true)}
-                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white transition-colors"
-                    >
-                        <FolderOpen size={12} />
-                        <span>Files</span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowFileDropdown(prev => !prev)}
+                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                        >
+                            <File size={12} />
+                            <span>{currentMetadata?.filename || 'Select File'}</span>
+                            <ChevronDown size={12} />
+                        </button>
+                        {showFileDropdown && (
+                            <div className="absolute top-full left-0 mt-1 bg-[#2a2a2a] border border-[#3a3a3a] rounded shadow-lg z-50 min-w-[200px]">
+                                {availableFiles.length > 0 ? (
+                                    availableFiles.map((filename) => (
+                                        <button
+                                            key={filename}
+                                            onClick={() => handleFileSelect(filename)}
+                                            className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#3a3a3a] transition-colors"
+                                        >
+                                            {filename}
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="px-3 py-2 text-xs text-[#666]">
+                                        No files available
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     <button
                         onClick={() => setShowInfoModal(true)}
@@ -145,7 +162,6 @@ const Dashboard: React.FC = () => {
                         <Info size={12} />
                         <span>Info</span>
                     </button>
-
 
                     <button
                         onClick={() => setShowQuadView(prev => !prev)}
@@ -172,9 +188,6 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     {currentMetadata && (
                         <div className="flex items-center space-x-2 text-xs">
-                            <File size={12} className="text-[#999]" />
-                            <span className="text-white font-medium">{currentMetadata.filename}</span>
-                            <span className="text-[#666]">·</span>
                             <span className="text-[#999]">{currentMetadata.rowCount.toLocaleString()} rows</span>
                         </div>
                     )}
@@ -313,21 +326,6 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            {showUploadModal && (
-                <CSVUpload
-                    onUploadComplete={handleUploadComplete}
-                    onClose={() => setShowUploadModal(false)}
-                />
-            )}
-
-            {showFileManager && (
-                <FileManager
-                    onSelectFile={handleFileSelect}
-                    selectedFileId={currentFileId}
-                    onClose={() => setShowFileManager(false)}
-                />
-            )}
-
             <div className="flex-1 overflow-hidden">
                 {showQuadView ? (
                     <QuadView
@@ -354,15 +352,9 @@ const Dashboard: React.FC = () => {
                 ) : (
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center">
-                            <Upload className="mx-auto mb-4 text-[#666]" size={64} />
+                            <File className="mx-auto mb-4 text-[#666]" size={64} />
                             <h2 className="text-white text-xl mb-2">No CSV File Loaded</h2>
-                            <p className="text-[#999] mb-4">Upload a CSV file to begin visualization</p>
-                            <button
-                                onClick={() => setShowUploadModal(true)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                            >
-                                Upload CSV File
-                            </button>
+                            <p className="text-[#999] mb-4">Select a file from the dropdown to begin</p>
                         </div>
                     </div>
                 )}

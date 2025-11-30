@@ -162,6 +162,10 @@ const Dashboard: React.FC = () => {
             return { initialIndicators: [], propagations: [] };
         }
 
+        if (selectedTimeframes.length === 0) {
+            return { initialIndicators: [], propagations: [] };
+        }
+
         const filteredPredictions = { ...allPredictionsData[currentFileId] };
 
         const result = extractTrendIndicators(filteredPredictions);
@@ -185,6 +189,10 @@ const Dashboard: React.FC = () => {
         }
 
         if (selectedTimeframes.length > 0 && selectedTimeframes.length < availableTimeframes.length) {
+            filteredInitialIndicators = filteredInitialIndicators.filter(ind =>
+                selectedTimeframes.includes(ind.timeframe)
+            );
+
             filteredPropagations = filteredPropagations.filter(prop =>
                 selectedTimeframes.includes(prop.higher_freq) || selectedTimeframes.includes(prop.lower_freq)
             );

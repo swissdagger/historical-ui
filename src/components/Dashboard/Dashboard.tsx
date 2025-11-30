@@ -335,7 +335,7 @@ const Dashboard: React.FC = () => {
                             <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
                                     <Calendar size={14} className="text-[#999]" />
-                                    <label className="text-white text-xs font-medium">DateTime Range:</label>
+                                    <label className="text-white text-xs font-medium">Datetime Range:</label>
                                     <input
                                         type="text"
                                         value={startDate}

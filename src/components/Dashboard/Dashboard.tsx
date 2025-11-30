@@ -201,13 +201,13 @@ const Dashboard: React.FC = () => {
                             <ChevronDown size={12} />
                         </button>
                         {showFileDropdown && (
-                            <div className="absolute top-full left-0 mt-2 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg shadow-2xl z-50 min-w-[200px] max-h-[300px] overflow-y-auto">
+                            <div className="absolute top-full left-0 mt-1 bg-[#2a2a2a] border border-[#3a3a3a] rounded shadow-lg z-50 min-w-[200px]">
                                 {availableFiles.length > 0 ? (
                                     availableFiles.map((filename) => (
                                         <button
                                             key={filename}
                                             onClick={() => handleFileSelect(filename)}
-                                            className="w-full text-left px-4 py-2.5 text-xs text-white hover:bg-[#3a3a3a] transition-all duration-150 first:rounded-t-lg last:rounded-b-lg"
+                                            className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#3a3a3a] transition-colors"
                                         >
                                             {getDisplayName(filename)}
                                         </button>
@@ -223,7 +223,7 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white transition-all duration-200 shadow-sm"
+                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white transition-colors"
                     >
                         <Info size={12} />
                         <span>Info</span>
@@ -231,7 +231,7 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowQuadView(prev => !prev)}
-                        className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 shadow-sm ${showQuadView
+                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showQuadView
                                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                                 : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
                             }`}
@@ -242,7 +242,7 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowAllInsights(prev => !prev)}
-                        className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 shadow-sm ${showAllInsights
+                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
                                 ? 'bg-green-600 text-white hover:bg-green-700'
                                 : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
                             }`}
@@ -315,8 +315,8 @@ const Dashboard: React.FC = () => {
                         />
                     </div>
                 ) : currentFileId ? (
-                    <div className="bg-[#0a0a0a]">
-                        <div className="bg-[#1a1a1a] rounded-lg mx-4 mt-4 shadow-xl" style={{ height: 'calc(100vh - 2rem)' }}>
+                    <div className="bg-[#1a1a1a]">
+                        <div className="bg-[#1a1a1a]" style={{ height: '100vh' }}>
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
                                 height={window.innerHeight}
@@ -331,9 +331,8 @@ const Dashboard: React.FC = () => {
                                 selectedTimeframes={selectedTimeframes}
                             />
                         </div>
-                        <div className="bg-[#0a0a0a] px-4 py-6">
-                            <div className="bg-[#1a1a1a] rounded-lg p-4 mb-6 shadow-lg border border-[#2a2a2a]">
-                            <div className="flex flex-wrap gap-4">
+                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
+                            <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
                                     <Calendar size={14} className="text-[#999]" />
                                     <label className="text-white text-xs font-medium">DateTime Range:</label>
@@ -341,7 +340,7 @@ const Dashboard: React.FC = () => {
                                         type="text"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="px-3 py-1.5 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono transition-all"
+                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                     <span className="text-[#999]">to</span>
@@ -349,7 +348,7 @@ const Dashboard: React.FC = () => {
                                         type="text"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="px-3 py-1.5 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono transition-all"
+                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                 </div>
@@ -366,7 +365,7 @@ const Dashboard: React.FC = () => {
                                                         setSelectedTimeframes(prev => [...prev, tf]);
                                                     }
                                                 }}
-                                                className={`px-3 py-1.5 text-xs rounded-md transition-all ${
+                                                className={`px-2 py-1 text-xs rounded transition-colors ${
                                                     selectedTimeframes.includes(tf)
                                                         ? 'bg-blue-600 text-white'
                                                         : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a]'
@@ -378,35 +377,34 @@ const Dashboard: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            </div>
 
-                            <div className="bg-[#1a1a1a] rounded-lg p-6 mb-6 shadow-lg border border-[#2a2a2a]">
-                                <h3 className="text-white font-semibold mb-4 text-base">Initial Indicators</h3>
-                                <div className="overflow-x-auto rounded-lg border border-[#2a2a2a]">
+                            <div className="mb-6">
+                                <h3 className="text-white font-medium mb-3 text-sm">Initial Indicators</h3>
+                                <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
-                                            <tr className="bg-[#252525]">
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Datetime</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Value</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Timeframe</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">End Datetime</th>
+                                            <tr className="bg-[#2a2a2a]">
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Datetime</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Value</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Timeframe</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">End Datetime</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
-                                                <tr key={idx} className="hover:bg-[#252525] transition-colors">
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 font-mono text-white">{ind.datetime}</td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3">
+                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono text-white">{ind.datetime}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">
                                                         <span className={ind.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
                                                             {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 text-white">{ind.timeframe}</td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 font-mono text-white">{ind.end_datetime || 'N/A'}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{ind.timeframe}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono text-white">{ind.end_datetime || 'N/A'}</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={4} className="px-4 py-8 text-center text-[#666]">
+                                                    <td colSpan={4} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
                                                         No initial indicators found
                                                     </td>
                                                 </tr>
@@ -416,37 +414,37 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="bg-[#1a1a1a] rounded-lg p-6 shadow-lg border border-[#2a2a2a]">
-                                <h3 className="text-white font-semibold mb-4 text-base">Propagations</h3>
-                                <div className="overflow-x-auto rounded-lg border border-[#2a2a2a]">
+                            <div>
+                                <h3 className="text-white font-medium mb-3 text-sm">Propagations</h3>
+                                <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
-                                            <tr className="bg-[#252525]">
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Prop ID</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Level</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Datetime</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Value</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Higher Freq</th>
-                                                <th className="border-b border-[#3a3a3a] px-4 py-3 text-left text-white font-semibold">Lower Freq</th>
+                                            <tr className="bg-[#2a2a2a]">
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Prop ID</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Level</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Datetime</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Value</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Higher Freq</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Lower Freq</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {propagations.length > 0 ? propagations.map((prop, idx) => (
-                                                <tr key={idx} className="hover:bg-[#252525] transition-colors">
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 text-white">{prop.propagation_id}</td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 text-white">{prop.propagation_level}</td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 font-mono text-white">{prop.datetime}</td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3">
+                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.propagation_id}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.propagation_level}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono text-white">{prop.datetime}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">
                                                         <span className={prop.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
                                                             {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 text-white">{prop.higher_freq}</td>
-                                                    <td className="border-b border-[#2a2a2a] px-4 py-3 text-white">{prop.lower_freq}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.higher_freq}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.lower_freq}</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={6} className="px-4 py-8 text-center text-[#666]">
+                                                    <td colSpan={6} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
                                                         No propagations found
                                                     </td>
                                                 </tr>

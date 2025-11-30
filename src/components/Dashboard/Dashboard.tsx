@@ -278,7 +278,7 @@ const Dashboard: React.FC = () => {
                                 <h3 className="text-white font-medium mb-2">Visualisation</h3>
                                 <p className="text-sm">
                                     The chart displays the open price as a line. Green dots represent positive causal chain insights,
-                                    whilst red dots represent negative causal chain insights. Predictions are plotted at the open price of
+                                    whilst red dots represent negative causal chain insights. Forecasts are plotted at the open price of
                                     the corresponding candle.
                                 </p>
                             </div>

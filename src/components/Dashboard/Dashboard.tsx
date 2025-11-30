@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import ChartContainer from '../Chart/ChartContainer';
-import QuadView from './QuadView';
 import { getInitialTimeframes, calculateDataLimit, convertIntervalToMinutes } from '../../api/binanceAPI';
 import { setSixteenTimesMode, subscribeToPredictionUpdates, loadPredictionsForTicker } from '../../services/predictionService';
 import { TimeframeConfig, PredictionEntry } from '../../types';
 import { SUPPORTED_PREDICTION_INTERVALS } from '../../api/sumtymeAPI';
-import { Info, X, Grid3x3 as Grid3X3, File, ChevronDown, Calendar } from 'lucide-react';
+import { Info, X, File, ChevronDown, Calendar } from 'lucide-react';
 import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile } from '../../services/csvService';
 import { extractTrendIndicators, InitialIndicator, Propagation } from '../../utils/indicatorAnalysis';
 import { getDisplayName } from '../../config/fileConfig';
@@ -30,7 +29,6 @@ const Dashboard: React.FC = () => {
     const [currentFilename, setCurrentFilename] = useState<string>('');
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showHistoricalPerformance, setShowHistoricalPerformance] = useState(false);
-    const [showQuadView, setShowQuadView] = useState(false);
     const [showAllInsights, setShowAllInsights] = useState(false);
     const [loadedFileIds, setLoadedFileIds] = useState<string[]>([]);
     const [availableFiles, setAvailableFiles] = useState<string[]>([]);
@@ -44,11 +42,6 @@ const Dashboard: React.FC = () => {
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)
     );
     const [allPredictionsData, setAllPredictionsData] = useState<Record<string, Record<string, PredictionEntry[]>>>({});
-    const [quadViewFileIds, setQuadViewFileIds] = useState<string[]>([]);
-
-    const handleQuadViewFilesChange = useCallback((fileIds: string[]) => {
-        setQuadViewFileIds(fileIds);
-    }, []);
 
     useEffect(() => {
         const updatedTimeframes = userSelectedTimeframes.map(tf => {
@@ -230,17 +223,6 @@ const Dashboard: React.FC = () => {
                     </button>
 
                     <button
-                        onClick={() => setShowQuadView(prev => !prev)}
-                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showQuadView
-                                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
-                            }`}
-                    >
-                        <Grid3X3 size={12} />
-                        <span>Quad View</span>
-                    </button>
-
-                    <button
                         onClick={() => setShowAllInsights(prev => !prev)}
                         className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
                                 ? 'bg-green-600 text-white hover:bg-green-700'
@@ -283,7 +265,6 @@ const Dashboard: React.FC = () => {
                                 <ol className="list-decimal list-inside space-y-1 text-sm">
                                     <li>Select a file from the dropdown to load data</li>
                                     <li>Use date range and timeframe filters to focus on specific periods</li>
-                                    <li>Enable "Quad View" to compare multiple CSV files side-by-side</li>
                                     <li>Turn on "All Insights" to see all prediction points instead of just propagations</li>
                                     <li>View Initial Indicators and Propagations tables below the chart</li>
                                 </ol>
@@ -303,18 +284,7 @@ const Dashboard: React.FC = () => {
             )}
 
             <div className="pb-8">
-                {showQuadView ? (
-                    <div style={{ height: '100vh' }}>
-                        <QuadView
-                        userSelectedTimeframes={userSelectedTimeframes}
-                        showHistoricalPerformance={showHistoricalPerformance}
-                        onTimeframeUpdate={handleTimeframeUpdate}
-                        onFilesChange={handleQuadViewFilesChange}
-                        showAllInsights={showAllInsights}
-                        loadedFileIds={loadedFileIds}
-                        />
-                    </div>
-                ) : currentFileId ? (
+                {currentFileId ? (
                     <div className="bg-[#1a1a1a]">
                         <div className="bg-[#1a1a1a]" style={{ height: '100vh' }}>
                             <ChartContainer

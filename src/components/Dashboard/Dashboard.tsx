@@ -173,8 +173,8 @@ const Dashboard: React.FC = () => {
     }, [currentFileId, allPredictionsData, startDate, endDate, selectedTimeframes, availableTimeframes]);
 
     return (
-        <div className="h-screen flex flex-col bg-[#1a1a1a]">
-            <div className="flex items-center justify-between bg-[#1a1a1a] border-b border-[#2a2a2a] px-2 py-0.5 md:px-4 md:py-1">
+        <div className="min-h-screen bg-[#1a1a1a]">
+            <div className="flex items-center justify-between bg-[#1a1a1a] border-b border-[#2a2a2a] px-2 py-0.5 md:px-4 md:py-1 sticky top-0 z-20">
                 <div className="flex items-center space-x-2">
                     <div className="relative">
                         <button
@@ -298,7 +298,7 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto">
+            <div>
                 {showQuadView ? (
                     <QuadView
                         userSelectedTimeframes={userSelectedTimeframes}
@@ -310,7 +310,7 @@ const Dashboard: React.FC = () => {
                     />
                 ) : currentFileId ? (
                     <div className="bg-[#1a1a1a]">
-                        <div className="bg-[#1a1a1a]">
+                        <div className="bg-[#1a1a1a]" style={{ height: 'calc(100vh - 32px)' }}>
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
                                 height={window.innerHeight - 32}
@@ -322,7 +322,7 @@ const Dashboard: React.FC = () => {
                                 showAllInsights={showAllInsights}
                             />
                         </div>
-                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
+                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4 min-h-screen">
                             <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
                                     <Calendar size={14} className="text-[#999]" />

@@ -18,17 +18,17 @@ const Header: React.FC<HeaderProps> = ({
   const isPriceUp = priceChange >= 0;
 
   return (
-    <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-20">
-      <div className="container mx-auto px-4 py-3">
+    <header className="bg-[#1a1a1a] border-b border-[#2a2a2a] sticky top-0 z-20 shadow-lg">
+      <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <TrendingUp className="text-blue-500 mr-2\" size={24} />
-            <h1 className="text-white text-xl font-bold">BTC Dashboard</h1>
+            <h1 className="text-white text-xl font-semibold">BTC Dashboard</h1>
           </div>
           
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center space-x-8">
             <div className="flex flex-col items-end">
-              <div className="text-white font-mono text-lg font-semibold">
+              <div className="text-white font-mono text-lg font-bold">
                 ${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className={`text-sm font-mono ${isPriceUp ? 'text-green-400' : 'text-red-400'}`}>
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({
               href="https://github.com/yourusername/btc-trading-dashboard" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-400 hover:text-white transition-all duration-200"
             >
               <Github size={20} />
             </a>
@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({
       
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-slate-800 py-4 px-4 absolute w-full border-b border-slate-700">
+        <div className="md:hidden bg-[#252525] py-4 px-4 absolute w-full border-b border-[#2a2a2a] shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <div className="text-white font-mono text-lg font-semibold">
               ${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

@@ -150,7 +150,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     fixLeftEdge = true,
     onTimeframeUpdate,
     showHistoricalPerformance = false,
-    showAllInsights = false
+    showAllInsights = false,
+    startDate,
+    endDate,
+    selectedTimeframes
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const overlayContainerRef = useRef<HTMLDivElement>(null);
@@ -162,6 +165,26 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     const [viewUpdateTrigger, setViewUpdateTrigger] = useState(0);
     const [arrowPositions, setArrowPositions] = useState<ArrowPosition[]>([]);
     const [isMobile, setIsMobile] = useState(false);
+
+    const filterPredictionsByDateAndTimeframe = (preds: PredictionEntry[]): PredictionEntry[] => {
+        let filtered = preds;
+
+        if (startDate || endDate) {
+            const start = startDate ? new Date(startDate) : new Date(0);
+            const end = endDate ? new Date(endDate) : new Date(8640000000000000);
+
+            filtered = filtered.filter(pred => {
+                const predDate = new Date(pred.datetime.replace(' ', 'T') + 'Z');
+                return predDate >= start && predDate <= end;
+            });
+        }
+
+        if (selectedTimeframes && selectedTimeframes.length > 0) {
+            filtered = filtered.filter(pred => selectedTimeframes.includes(pred.timeframeId));
+        }
+
+        return filtered;
+    };
 
     // Timeframe input state
     const [timeframeInputValue, setTimeframeInputValue] = useState('');
@@ -409,7 +432,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const priceScaleWidth = rightPriceScale.width();
         const maxX = totalWidth - priceScaleWidth - 9;
 
-        const filteredPredictions = predictions.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol);
+        const dateAndTimeframeFiltered = filterPredictionsByDateAndTimeframe(predictions);
+        const filteredPredictions = dateAndTimeframeFiltered.filter(prediction => prediction.value !== 0 && prediction.ticker === symbol);
 
         console.log('[ChartContainer] calculateArrowPositions:', {
             totalPredictions: predictions.length,

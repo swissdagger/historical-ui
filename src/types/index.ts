@@ -82,6 +82,9 @@ export interface ChartContainerProps {
   showHistoricalPerformance?: boolean;
   allPredictions?: Record<string, PredictionEntry[]>;
   showAllInsights?: boolean;
+  startDate?: string;
+  endDate?: string;
+  selectedTimeframes?: string[];
 }
 
 export interface PredictionArrowProps {

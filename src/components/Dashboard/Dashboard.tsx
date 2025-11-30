@@ -13,11 +13,11 @@ import { getDisplayName } from '../../config/fileConfig';
 const parseCustomDateTime = (dateStr: string): Date | null => {
     if (!dateStr || dateStr.trim() === '') return null;
 
-    // Try parsing YYYY-MM-DD HH:MM:SS format
+    // Try parsing YYYY-MM-DD HH:MM:SS format as UTC
     const match = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
     if (match) {
         const [, year, month, day, hour, minute, second] = match;
-        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+        return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second)));
     }
 
     // Fallback to standard parsing
@@ -168,12 +168,12 @@ const Dashboard: React.FC = () => {
             const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
 
             filteredInitialIndicators = filteredInitialIndicators.filter(ind => {
-                const indDate = new Date(ind.datetime);
+                const indDate = new Date(ind.datetime.replace(' ', 'T') + 'Z');
                 return indDate >= start && indDate <= end;
             });
 
             filteredPropagations = filteredPropagations.filter(prop => {
-                const propDate = new Date(prop.datetime);
+                const propDate = new Date(prop.datetime.replace(' ', 'T') + 'Z');
                 return propDate >= start && propDate <= end;
             });
         }

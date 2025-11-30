@@ -17,11 +17,11 @@ const parseDateTime = (datetime: string): number => {
 const parseCustomDateTime = (dateStr: string): Date | null => {
     if (!dateStr || dateStr.trim() === '') return null;
 
-    // Try parsing YYYY-MM-DD HH:MM:SS format
+    // Try parsing YYYY-MM-DD HH:MM:SS format as UTC
     const match = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
     if (match) {
         const [, year, month, day, hour, minute, second] = match;
-        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+        return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second)));
     }
 
     // Fallback to standard parsing

@@ -50,23 +50,6 @@ function parseYYYYMMDD(dateStr: string): Date | null {
   return isNaN(date.getTime()) ? null : date;
 }
 
-function parseYYYYDDMM(dateStr: string): Date | null {
-  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
-  if (!match) return null;
-
-  const [, year, day, month, hour, minute, second] = match;
-  const date = new Date(Date.UTC(
-    parseInt(year),
-    parseInt(month) - 1,
-    parseInt(day),
-    parseInt(hour),
-    parseInt(minute),
-    parseInt(second)
-  ));
-
-  return isNaN(date.getTime()) ? null : date;
-}
-
 function parseDDMMYYYY(dateStr: string): Date | null {
   const match = dateStr.match(/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
   if (!match) return null;
@@ -178,30 +161,6 @@ function disambiguateDDMMvsMMDD(rows: string[][], separator: string): { format: 
     : { format: 'MM-DD-YYYY HH:mm:ss', parser: parseMMDDYYYY };
 }
 
-function disambiguateYYYYDDMMvsYYYYMMDD(rows: string[][]): { format: string; parser: (str: string) => Date | null } | null {
-  const pattern = /^(\d{4})-(\d{2})-(\d{2}) \d{2}:\d{2}:\d{2}$/;
-
-  for (let i = 0; i < Math.min(rows.length, 50); i++) {
-    const dateStr = rows[i][0];
-    if (!dateStr) continue;
-
-    const match = dateStr.match(pattern);
-    if (!match) continue;
-
-    const secondNum = parseInt(match[2]);
-    const thirdNum = parseInt(match[3]);
-
-    if (secondNum > 12) {
-      return { format: 'YYYY-DD-MM HH:mm:ss', parser: parseYYYYDDMM };
-    }
-    if (thirdNum > 12) {
-      return { format: 'YYYY-MM-DD HH:mm:ss', parser: parseYYYYMMDD };
-    }
-  }
-
-  return { format: 'YYYY-MM-DD HH:mm:ss', parser: parseYYYYMMDD };
-}
-
 export async function parseCSVFile(file: File): Promise<CSVParseResult> {
   try {
     const text = await file.text();
@@ -286,17 +245,12 @@ export function parseCSVText(text: string): CSVParseResult {
     if (!datetimeInfo) {
       return {
         success: false,
-        error: `Invalid datetime format in first data row. Expected formats: YYYY-MM-DD HH:mm:ss, YYYY-DD-MM HH:mm:ss, DD-MM-YYYY HH:mm:ss, MM-DD-YYYY HH:mm:ss, DD/MM/YYYY HH:mm:ss, or MM/DD/YYYY HH:mm:ss`,
+        error: `Invalid datetime format in first data row. Expected formats: YYYY-MM-DD HH:mm:ss, DD-MM-YYYY HH:mm:ss, MM-DD-YYYY HH:mm:ss, DD/MM/YYYY HH:mm:ss, or MM/DD/YYYY HH:mm:ss`,
         errorLine: 2
       };
     }
 
-    if (firstDateStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-      const disambiguated = disambiguateYYYYDDMMvsYYYYMMDD(dataRows);
-      if (disambiguated) {
-        datetimeInfo = disambiguated;
-      }
-    } else if (firstDateStr.match(/^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/)) {
+    if (firstDateStr.match(/^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/)) {
       const disambiguated = disambiguateDDMMvsMMDD(dataRows, '-');
       if (disambiguated) {
         datetimeInfo = disambiguated;

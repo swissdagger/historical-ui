@@ -8,28 +8,15 @@ import { Info, X, File, ChevronDown, Calendar } from 'lucide-react';
 import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile } from '../../services/csvService';
 import { extractTrendIndicators, InitialIndicator, Propagation } from '../../utils/indicatorAnalysis';
 import { getDisplayName } from '../../config/fileConfig';
-import { MultiSelect } from '../common/MultiSelect';
 
 const parseCustomDateTime = (dateStr: string): Date | null => {
     if (!dateStr || dateStr.trim() === '') return null;
 
-    // Try parsing YYYY-MM-DD or YYYY-DD-MM format as UTC
+    // Try parsing YYYY-MM-DD HH:MM:SS format as UTC
     const match = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
     if (match) {
-        const [, year, secondNum, thirdNum, hour, minute, second] = match;
-        const second_val = parseInt(secondNum);
-        const third_val = parseInt(thirdNum);
-
-        // Disambiguate: if second position > 12, it's day (YYYY-DD-MM)
-        // if third position > 12, it's day (YYYY-MM-DD)
-        // otherwise default to YYYY-MM-DD
-        if (second_val > 12) {
-            // YYYY-DD-MM format
-            return new Date(Date.UTC(parseInt(year), third_val - 1, second_val, parseInt(hour), parseInt(minute), parseInt(second)));
-        } else {
-            // YYYY-MM-DD format (default)
-            return new Date(Date.UTC(parseInt(year), second_val - 1, third_val, parseInt(hour), parseInt(minute), parseInt(second)));
-        }
+        const [, year, month, day, hour, minute, second] = match;
+        return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second)));
     }
 
     // Fallback to standard parsing
@@ -337,12 +324,27 @@ const Dashboard: React.FC = () => {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <label className="text-white text-xs font-medium">Timeframes:</label>
-                                    <MultiSelect
-                                        options={availableTimeframes}
-                                        value={selectedTimeframes}
-                                        onChange={setSelectedTimeframes}
-                                        placeholder="Select timeframes"
-                                    />
+                                    <div className="flex flex-wrap gap-1">
+                                        {availableTimeframes.map((tf) => (
+                                            <button
+                                                key={tf}
+                                                onClick={() => {
+                                                    if (selectedTimeframes.includes(tf)) {
+                                                        setSelectedTimeframes(prev => prev.filter(t => t !== tf));
+                                                    } else {
+                                                        setSelectedTimeframes(prev => [...prev, tf]);
+                                                    }
+                                                }}
+                                                className={`px-2 py-1 text-xs rounded transition-colors ${
+                                                    selectedTimeframes.includes(tf)
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a]'
+                                                }`}
+                                            >
+                                                {tf}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 

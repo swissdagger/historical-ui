@@ -14,8 +14,8 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen bg-[#2a2a2a] overflow-hidden">
-      <main className="h-full">
+    <div className="min-h-screen bg-[#2a2a2a]">
+      <main>
         <Dashboard />
       </main>
     </div>

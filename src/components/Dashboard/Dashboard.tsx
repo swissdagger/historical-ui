@@ -310,10 +310,10 @@ const Dashboard: React.FC = () => {
                     />
                 ) : currentFileId ? (
                     <div className="bg-[#1a1a1a]">
-                        <div className="bg-[#1a1a1a]" style={{ height: 'calc(100vh - 32px)' }}>
+                        <div className="bg-[#1a1a1a]">
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
-                                height={window.innerHeight - 32}
+                                height={800}
                                 symbol={currentFileId}
                                 fixLeftEdge={true}
                                 onTimeframeUpdate={handleTimeframeUpdate}
@@ -322,7 +322,7 @@ const Dashboard: React.FC = () => {
                                 showAllInsights={showAllInsights}
                             />
                         </div>
-                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4 min-h-screen">
+                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
                             <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
                                     <Calendar size={14} className="text-[#999]" />

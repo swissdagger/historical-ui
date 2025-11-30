@@ -184,6 +184,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     const filterPredictionsByDateAndTimeframe = (preds: PredictionEntry[]): PredictionEntry[] => {
         let filtered = preds;
 
+        if (selectedTimeframes && selectedTimeframes.length === 0) {
+            return [];
+        }
+
         if (startDate || endDate) {
             const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
             const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);

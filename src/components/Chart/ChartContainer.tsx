@@ -890,7 +890,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             unsubscribePredictions();
             unsubscribeViewUpdates();
         };
-    }, [timeframe, symbol, showHistoricalPerformance, startDate, endDate]);
+    }, [timeframe, symbol, showHistoricalPerformance, startDate, endDate, selectedTimeframes]);
 
     // Update predictions when showHistoricalPerformance changes
     useEffect(() => {

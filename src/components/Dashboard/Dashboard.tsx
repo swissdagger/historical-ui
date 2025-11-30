@@ -298,7 +298,7 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-y-auto">
                 {showQuadView ? (
                     <QuadView
                         userSelectedTimeframes={userSelectedTimeframes}
@@ -309,11 +309,11 @@ const Dashboard: React.FC = () => {
                         loadedFileIds={loadedFileIds}
                     />
                 ) : currentFileId ? (
-                    <>
-                        <div className="flex-shrink-0 bg-[#1a1a1a]">
+                    <div className="bg-[#1a1a1a]">
+                        <div className="bg-[#1a1a1a]">
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
-                                height={Math.floor((window.innerHeight - 32) * 0.6)}
+                                height={window.innerHeight - 32}
                                 symbol={currentFileId}
                                 fixLeftEdge={true}
                                 onTimeframeUpdate={handleTimeframeUpdate}
@@ -322,7 +322,7 @@ const Dashboard: React.FC = () => {
                                 showAllInsights={showAllInsights}
                             />
                         </div>
-                        <div className="flex-1 overflow-y-auto bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
+                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
                             <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
                                     <Calendar size={14} className="text-[#999]" />
@@ -445,7 +445,7 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    </>
+                    </div>
                 ) : (
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center">

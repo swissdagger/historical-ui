@@ -14,6 +14,21 @@ const parseDateTime = (datetime: string): number => {
     return Math.floor(new Date(datetime.replace(' ', 'T') + 'Z').getTime() / 1000);
 };
 
+const parseCustomDateTime = (dateStr: string): Date | null => {
+    if (!dateStr || dateStr.trim() === '') return null;
+
+    // Try parsing MM/DD/YYYY HH:MM:SS format
+    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
+    if (match) {
+        const [, month, day, year, hour, minute, second] = match;
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+    }
+
+    // Fallback to standard parsing
+    const parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? null : parsed;
+};
+
 const getAlignedTimestamp = (timestamp: number, interval: string): number => {
     // Validate input timestamp
     if (!timestamp || timestamp <= 0 || !isFinite(timestamp)) {
@@ -170,8 +185,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         let filtered = preds;
 
         if (startDate || endDate) {
-            const start = startDate ? new Date(startDate) : new Date(0);
-            const end = endDate ? new Date(endDate) : new Date(8640000000000000);
+            const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
+            const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
 
             filtered = filtered.filter(pred => {
                 const predDate = new Date(pred.datetime.replace(' ', 'T') + 'Z');
@@ -184,6 +199,20 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return filtered;
+    };
+
+    const filterKlinesByDateRange = (klines: CandlestickData[]): CandlestickData[] => {
+        if (!startDate && !endDate) {
+            return klines;
+        }
+
+        const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
+        const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
+
+        return klines.filter(kline => {
+            const klineDate = new Date(kline.time * 1000);
+            return klineDate >= start && klineDate <= end;
+        });
     };
 
     // Timeframe input state
@@ -742,13 +771,14 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             // Fetch data using the timeframe's dataLimit (which may be tripled)
             const historicalData = await fetchKlineData(timeframe, symbol, 0);
             if (seriesRef.current && historicalData.length > 0) {
+                const filteredHistoricalData = filterKlinesByDateRange(historicalData);
                 seriesRef.current.setData(
-                    historicalData.map(candle => ({
+                    filteredHistoricalData.map(candle => ({
                         time: candle.time,
                         value: candle.open, // Changed from candle.close to candle.open
                     }))
                 );
-                setCurrentData(historicalData);
+                setCurrentData(filteredHistoricalData);
                 setLastPrice(historicalData[historicalData.length - 1]);
 
                 // Set the visible range to show all data
@@ -792,15 +822,16 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             if (timeframeId === timeframe.id && dataSymbol === symbol && seriesRef.current) {
                 // Get the current data
                 const currentDataToUse = getCurrentData(timeframe.id, symbol);
+                const filteredCurrentData = filterKlinesByDateRange(currentDataToUse);
                 const latestData = currentDataToUse[currentDataToUse.length - 1];
 
                 seriesRef.current.setData(
-                    currentDataToUse.map(candle => ({
+                    filteredCurrentData.map(candle => ({
                         time: candle.time,
                         value: candle.open, // Changed from candle.close to candle.open
                     }))
                 );
-                setCurrentData(currentDataToUse);
+                setCurrentData(filteredCurrentData);
                 setLastPrice(latestData);
 
                 // Update predictions based on whether the current timeframe supports predictions
@@ -842,7 +873,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             unsubscribePredictions();
             unsubscribeViewUpdates();
         };
-    }, [timeframe, symbol, showHistoricalPerformance]);
+    }, [timeframe, symbol, showHistoricalPerformance, startDate, endDate]);
 
     // Update predictions when showHistoricalPerformance changes
     useEffect(() => {

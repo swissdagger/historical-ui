@@ -10,6 +10,21 @@ import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile } from
 import { extractTrendIndicators, InitialIndicator, Propagation } from '../../utils/indicatorAnalysis';
 import { getDisplayName } from '../../config/fileConfig';
 
+const parseCustomDateTime = (dateStr: string): Date | null => {
+    if (!dateStr || dateStr.trim() === '') return null;
+
+    // Try parsing MM/DD/YYYY HH:MM:SS format
+    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
+    if (match) {
+        const [, month, day, year, hour, minute, second] = match;
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
+    }
+
+    // Fallback to standard parsing
+    const parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? null : parsed;
+};
+
 const Dashboard: React.FC = () => {
     const [currentFileId, setCurrentFileId] = useState<string>('');
     const [currentFilename, setCurrentFilename] = useState<string>('');
@@ -149,8 +164,8 @@ const Dashboard: React.FC = () => {
         let filteredPropagations = result.propagations;
 
         if (startDate || endDate) {
-            const start = startDate ? new Date(startDate) : new Date(0);
-            const end = endDate ? new Date(endDate) : new Date(8640000000000000);
+            const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
+            const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
 
             filteredInitialIndicators = filteredInitialIndicators.filter(ind => {
                 const indDate = new Date(ind.datetime);
@@ -322,19 +337,19 @@ const Dashboard: React.FC = () => {
                                     <Calendar size={14} className="text-[#999]" />
                                     <label className="text-white text-xs font-medium">DateTime Range:</label>
                                     <input
-                                        type="datetime-local"
+                                        type="text"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600"
-                                        placeholder="Start DateTime"
+                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
+                                        placeholder="MM/DD/YYYY HH:MM:SS"
                                     />
                                     <span className="text-[#999]">to</span>
                                     <input
-                                        type="datetime-local"
+                                        type="text"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600"
-                                        placeholder="End DateTime"
+                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
+                                        placeholder="MM/DD/YYYY HH:MM:SS"
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2">

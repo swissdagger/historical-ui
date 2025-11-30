@@ -5,12 +5,14 @@ import { getInitialTimeframes, calculateDataLimit, convertIntervalToMinutes } fr
 import { setSixteenTimesMode, subscribeToPredictionUpdates, loadPredictionsForTicker } from '../../services/predictionService';
 import { TimeframeConfig, PredictionEntry } from '../../types';
 import { SUPPORTED_PREDICTION_INTERVALS } from '../../api/sumtymeAPI';
-import { Info, X, Grid3x3 as Grid3X3, File, ChevronDown } from 'lucide-react';
+import { Info, X, Grid3x3 as Grid3X3, File, ChevronDown, Calendar } from 'lucide-react';
 import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile } from '../../services/csvService';
-import { extractTrendIndicators } from '../../utils/indicatorAnalysis';
+import { extractTrendIndicators, InitialIndicator, Propagation } from '../../utils/indicatorAnalysis';
+import { getDisplayName } from '../../config/fileConfig';
 
 const Dashboard: React.FC = () => {
     const [currentFileId, setCurrentFileId] = useState<string>('');
+    const [currentFilename, setCurrentFilename] = useState<string>('');
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [showHistoricalPerformance, setShowHistoricalPerformance] = useState(false);
     const [showQuadView, setShowQuadView] = useState(false);
@@ -18,6 +20,10 @@ const Dashboard: React.FC = () => {
     const [loadedFileIds, setLoadedFileIds] = useState<string[]>([]);
     const [availableFiles, setAvailableFiles] = useState<string[]>([]);
     const [showFileDropdown, setShowFileDropdown] = useState(false);
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
+    const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>([]);
+    const [availableTimeframes, setAvailableTimeframes] = useState<string[]>([]);
 
     const [userSelectedTimeframes, setUserSelectedTimeframes] = useState<TimeframeConfig[]>(
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)
@@ -50,8 +56,15 @@ const Dashboard: React.FC = () => {
                 const result = await loadLocalCSVFile(files[0]);
                 if (result.success && result.fileId) {
                     setCurrentFileId(result.fileId);
+                    setCurrentFilename(files[0]);
                     loadPredictionsForTicker(result.fileId);
                     setLoadedFileIds([result.fileId]);
+
+                    const metadata = getCSVMetadata(result.fileId);
+                    if (metadata) {
+                        setAvailableTimeframes(metadata.availableTimeframes);
+                        setSelectedTimeframes(metadata.availableTimeframes);
+                    }
                 }
             }
         };
@@ -104,9 +117,18 @@ const Dashboard: React.FC = () => {
         const result = await loadLocalCSVFile(filename);
         if (result.success && result.fileId) {
             setCurrentFileId(result.fileId);
+            setCurrentFilename(filename);
             loadPredictionsForTicker(result.fileId);
             if (!loadedFileIds.includes(result.fileId)) {
                 setLoadedFileIds(prev => [...prev, result.fileId]);
+            }
+
+            const metadata = getCSVMetadata(result.fileId);
+            if (metadata) {
+                setAvailableTimeframes(metadata.availableTimeframes);
+                setSelectedTimeframes(metadata.availableTimeframes);
+                setStartDate('');
+                setEndDate('');
             }
         }
         setShowFileDropdown(false);
@@ -118,8 +140,37 @@ const Dashboard: React.FC = () => {
         if (!currentFileId || !allPredictionsData[currentFileId]) {
             return { initialIndicators: [], propagations: [] };
         }
-        return extractTrendIndicators(allPredictionsData[currentFileId]);
-    }, [currentFileId, allPredictionsData]);
+
+        const filteredPredictions = { ...allPredictionsData[currentFileId] };
+
+        const result = extractTrendIndicators(filteredPredictions);
+
+        let filteredInitialIndicators = result.initialIndicators;
+        let filteredPropagations = result.propagations;
+
+        if (startDate || endDate) {
+            const start = startDate ? new Date(startDate) : new Date(0);
+            const end = endDate ? new Date(endDate) : new Date(8640000000000000);
+
+            filteredInitialIndicators = filteredInitialIndicators.filter(ind => {
+                const indDate = new Date(ind.datetime);
+                return indDate >= start && indDate <= end;
+            });
+
+            filteredPropagations = filteredPropagations.filter(prop => {
+                const propDate = new Date(prop.datetime);
+                return propDate >= start && propDate <= end;
+            });
+        }
+
+        if (selectedTimeframes.length > 0 && selectedTimeframes.length < availableTimeframes.length) {
+            filteredPropagations = filteredPropagations.filter(prop =>
+                selectedTimeframes.includes(prop.higher_freq) || selectedTimeframes.includes(prop.lower_freq)
+            );
+        }
+
+        return { initialIndicators: filteredInitialIndicators, propagations: filteredPropagations };
+    }, [currentFileId, allPredictionsData, startDate, endDate, selectedTimeframes, availableTimeframes]);
 
     return (
         <div className="h-screen flex flex-col bg-[#1a1a1a]">
@@ -131,7 +182,7 @@ const Dashboard: React.FC = () => {
                             className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                         >
                             <File size={12} />
-                            <span>{currentMetadata?.filename || 'Select File'}</span>
+                            <span>{currentFilename ? getDisplayName(currentFilename) : 'Select File'}</span>
                             <ChevronDown size={12} />
                         </button>
                         {showFileDropdown && (
@@ -143,7 +194,7 @@ const Dashboard: React.FC = () => {
                                             onClick={() => handleFileSelect(filename)}
                                             className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#3a3a3a] transition-colors"
                                         >
-                                            {filename}
+                                            {getDisplayName(filename)}
                                         </button>
                                     ))
                                 ) : (
@@ -209,88 +260,8 @@ const Dashboard: React.FC = () => {
 
                         <div className="p-6 space-y-4 text-[#ccc] leading-relaxed">
                             <p className="text-white font-medium">
-                                This tool visualizes historical cryptocurrency data from CSV files with forecasts from sumtyme.ai's Causal Intelligence Layer.
+                                This tool visualises historical data from CSV files with forecasts from sumtyme.ai's Causal Intelligence Layer.
                             </p>
-
-                            {currentFileId && (
-                                <>
-                                    <div className="pt-4 border-t border-[#2a2a2a]">
-                                        <h3 className="text-white font-medium mb-3">Initial Indicators</h3>
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-xs border-collapse">
-                                                <thead>
-                                                    <tr className="bg-[#2a2a2a]">
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Datetime</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Value</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Timeframe</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">End Datetime</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
-                                                        <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                            <td className="border border-[#3a3a3a] px-2 py-1 font-mono">{ind.datetime}</td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">
-                                                                <span className={ind.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
-                                                                    {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
-                                                                </span>
-                                                            </td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">{ind.timeframe}</td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1 font-mono">{ind.end_datetime || 'N/A'}</td>
-                                                        </tr>
-                                                    )) : (
-                                                        <tr>
-                                                            <td colSpan={4} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
-                                                                No initial indicators found
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-4 border-t border-[#2a2a2a]">
-                                        <h3 className="text-white font-medium mb-3">Propagations</h3>
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-xs border-collapse">
-                                                <thead>
-                                                    <tr className="bg-[#2a2a2a]">
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Prop ID</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Level</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Datetime</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Value</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Higher Freq</th>
-                                                        <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Lower Freq</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {propagations.length > 0 ? propagations.map((prop, idx) => (
-                                                        <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">{prop.propagation_id}</td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">{prop.propagation_level}</td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1 font-mono">{prop.datetime}</td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">
-                                                                <span className={prop.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
-                                                                    {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
-                                                                </span>
-                                                            </td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">{prop.higher_freq}</td>
-                                                            <td className="border border-[#3a3a3a] px-2 py-1">{prop.lower_freq}</td>
-                                                        </tr>
-                                                    )) : (
-                                                        <tr>
-                                                            <td colSpan={6} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
-                                                                No propagations found
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
 
                             <div className="pt-4 border-t border-[#2a2a2a]">
                                 <h3 className="text-white font-medium mb-2">CSV Format Requirements</h3>
@@ -306,18 +277,19 @@ const Dashboard: React.FC = () => {
                             <div className="pt-4 border-t border-[#2a2a2a]">
                                 <h3 className="text-white font-medium mb-2">How to Use</h3>
                                 <ol className="list-decimal list-inside space-y-1 text-sm">
-                                    <li>Click "Upload CSV" to select and upload your CSV file</li>
-                                    <li>Use "Files" button to manage and switch between uploaded files</li>
+                                    <li>Select a file from the dropdown to load data</li>
+                                    <li>Use date range and timeframe filters to focus on specific periods</li>
                                     <li>Enable "Quad View" to compare multiple CSV files side-by-side</li>
                                     <li>Turn on "All Insights" to see all prediction points instead of just propagations</li>
+                                    <li>View Initial Indicators and Propagations tables below the chart</li>
                                 </ol>
                             </div>
 
                             <div className="pt-4 border-t border-[#2a2a2a]">
-                                <h3 className="text-white font-medium mb-2">Visualization</h3>
+                                <h3 className="text-white font-medium mb-2">Visualisation</h3>
                                 <p className="text-sm">
                                     The chart displays the open price as a line. Green dots represent positive causal chain insights,
-                                    while red dots represent negative causal chain insights. Predictions are plotted at the open price of
+                                    whilst red dots represent negative causal chain insights. Predictions are plotted at the open price of
                                     the corresponding candle.
                                 </p>
                             </div>
@@ -326,7 +298,7 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden flex flex-col">
                 {showQuadView ? (
                     <QuadView
                         userSelectedTimeframes={userSelectedTimeframes}
@@ -337,18 +309,143 @@ const Dashboard: React.FC = () => {
                         loadedFileIds={loadedFileIds}
                     />
                 ) : currentFileId ? (
-                    <div className="h-full bg-[#1a1a1a]">
-                        <ChartContainer
-                            timeframe={getHighestFrequencyTimeframe()}
-                            height={window.innerHeight - 32}
-                            symbol={currentFileId}
-                            fixLeftEdge={true}
-                            onTimeframeUpdate={handleTimeframeUpdate}
-                            showHistoricalPerformance={showHistoricalPerformance}
-                            allPredictions={allPredictionsData}
-                            showAllInsights={showAllInsights}
-                        />
-                    </div>
+                    <>
+                        <div className="flex-shrink-0 bg-[#1a1a1a]">
+                            <ChartContainer
+                                timeframe={getHighestFrequencyTimeframe()}
+                                height={Math.floor((window.innerHeight - 32) * 0.6)}
+                                symbol={currentFileId}
+                                fixLeftEdge={true}
+                                onTimeframeUpdate={handleTimeframeUpdate}
+                                showHistoricalPerformance={showHistoricalPerformance}
+                                allPredictions={allPredictionsData}
+                                showAllInsights={showAllInsights}
+                            />
+                        </div>
+                        <div className="flex-1 overflow-y-auto bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
+                            <div className="mb-4 flex flex-wrap gap-4">
+                                <div className="flex items-center space-x-2">
+                                    <Calendar size={14} className="text-[#999]" />
+                                    <label className="text-white text-xs font-medium">Date Range:</label>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600"
+                                        placeholder="Start Date"
+                                    />
+                                    <span className="text-[#999]">to</span>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600"
+                                        placeholder="End Date"
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <label className="text-white text-xs font-medium">Timeframes:</label>
+                                    <div className="flex flex-wrap gap-1">
+                                        {availableTimeframes.map((tf) => (
+                                            <button
+                                                key={tf}
+                                                onClick={() => {
+                                                    if (selectedTimeframes.includes(tf)) {
+                                                        setSelectedTimeframes(prev => prev.filter(t => t !== tf));
+                                                    } else {
+                                                        setSelectedTimeframes(prev => [...prev, tf]);
+                                                    }
+                                                }}
+                                                className={`px-2 py-1 text-xs rounded transition-colors ${
+                                                    selectedTimeframes.includes(tf)
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a]'
+                                                }`}
+                                            >
+                                                {tf}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h3 className="text-white font-medium mb-3 text-sm">Initial Indicators</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-xs border-collapse">
+                                        <thead>
+                                            <tr className="bg-[#2a2a2a]">
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Datetime</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Value</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Timeframe</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">End Datetime</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
+                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono">{ind.datetime}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">
+                                                        <span className={ind.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
+                                                            {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">{ind.timeframe}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono">{ind.end_datetime || 'N/A'}</td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={4} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
+                                                        No initial indicators found
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-white font-medium mb-3 text-sm">Propagations</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-xs border-collapse">
+                                        <thead>
+                                            <tr className="bg-[#2a2a2a]">
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Prop ID</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Level</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Datetime</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Value</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Higher Freq</th>
+                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white">Lower Freq</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {propagations.length > 0 ? propagations.map((prop, idx) => (
+                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">{prop.propagation_id}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">{prop.propagation_level}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono">{prop.datetime}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">
+                                                        <span className={prop.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
+                                                            {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">{prop.higher_freq}</td>
+                                                    <td className="border border-[#3a3a3a] px-2 py-1">{prop.lower_freq}</td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={6} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
+                                                        No propagations found
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </>
                 ) : (
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center">

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body, #root {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+
 /* Custom scrollbar styling to match the app theme */
 ::-webkit-scrollbar {
   width: 8px;

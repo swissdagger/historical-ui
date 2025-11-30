@@ -310,10 +310,10 @@ const Dashboard: React.FC = () => {
                     />
                 ) : currentFileId ? (
                     <div className="bg-[#1a1a1a]">
-                        <div className="bg-[#1a1a1a]">
+                        <div className="bg-[#1a1a1a]" style={{ height: '100vh' }}>
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
-                                height={800}
+                                height={window.innerHeight}
                                 symbol={currentFileId}
                                 fixLeftEdge={true}
                                 onTimeframeUpdate={handleTimeframeUpdate}

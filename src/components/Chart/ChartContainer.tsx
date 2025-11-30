@@ -17,10 +17,10 @@ const parseDateTime = (datetime: string): number => {
 const parseCustomDateTime = (dateStr: string): Date | null => {
     if (!dateStr || dateStr.trim() === '') return null;
 
-    // Try parsing MM/DD/YYYY HH:MM:SS format
-    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
+    // Try parsing YYYY-MM-DD HH:MM:SS format
+    const match = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
     if (match) {
-        const [, month, day, year, hour, minute, second] = match;
+        const [, year, month, day, hour, minute, second] = match;
         return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
     }
 
@@ -209,10 +209,27 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
         const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
 
-        return klines.filter(kline => {
+        console.log('[ChartContainer] Filtering klines:', {
+            startDate,
+            endDate,
+            parsedStart: start,
+            parsedEnd: end,
+            totalKlines: klines.length,
+            firstKlineTime: klines.length > 0 ? new Date(klines[0].time * 1000).toISOString() : 'none',
+            lastKlineTime: klines.length > 0 ? new Date(klines[klines.length - 1].time * 1000).toISOString() : 'none'
+        });
+
+        const filtered = klines.filter(kline => {
             const klineDate = new Date(kline.time * 1000);
             return klineDate >= start && klineDate <= end;
         });
+
+        console.log('[ChartContainer] Filtered result:', {
+            originalCount: klines.length,
+            filteredCount: filtered.length
+        });
+
+        return filtered;
     };
 
     // Timeframe input state

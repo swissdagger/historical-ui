@@ -13,10 +13,10 @@ import { getDisplayName } from '../../config/fileConfig';
 const parseCustomDateTime = (dateStr: string): Date | null => {
     if (!dateStr || dateStr.trim() === '') return null;
 
-    // Try parsing MM/DD/YYYY HH:MM:SS format
-    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
+    // Try parsing YYYY-MM-DD HH:MM:SS format
+    const match = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
     if (match) {
-        const [, month, day, year, hour, minute, second] = match;
+        const [, year, month, day, hour, minute, second] = match;
         return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second));
     }
 
@@ -341,7 +341,7 @@ const Dashboard: React.FC = () => {
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
                                         className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
-                                        placeholder="MM/DD/YYYY HH:MM:SS"
+                                        placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                     <span className="text-[#999]">to</span>
                                     <input
@@ -349,7 +349,7 @@ const Dashboard: React.FC = () => {
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
                                         className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
-                                        placeholder="MM/DD/YYYY HH:MM:SS"
+                                        placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2">

@@ -73,6 +73,15 @@ export interface ArrowPosition {
     endTime?: string;
 }
 
+export interface Propagation {
+  propagation_id: string;
+  propagation_level: number;
+  datetime: string;
+  trend_type: number;
+  higher_freq: string;
+  lower_freq: string;
+}
+
 export interface ChartContainerProps {
   timeframe: TimeframeConfig;
   height: number;
@@ -85,6 +94,8 @@ export interface ChartContainerProps {
   startDate?: string;
   endDate?: string;
   selectedTimeframes?: string[];
+  propagations?: Propagation[];
+  showOnlyHighLevelPropagations?: boolean;
 }
 
 export interface PredictionArrowProps {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
-import { CandlestickData, ChartContainerProps, PredictionEntry, ArrowPosition } from '../../types';
+import { CandlestickData, ChartContainerProps, PredictionEntry, ArrowPosition, Propagation } from '../../types';
 import { fetchKlineData, subscribeToUpdates, getCurrentData, parseAndValidateTimeframeInput, calculateDataLimit } from '../../api/binanceAPI';
 import { subscribeToPredictionUpdates, getCurrentPredictions, subscribeToViewUpdates, getAvailableTimeframes } from '../../api/sumtymeAPI';
 import PredictionArrow from './PredictionArrow';
@@ -168,7 +168,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     showAllInsights = false,
     startDate,
     endDate,
-    selectedTimeframes
+    selectedTimeframes,
+    propagations = [],
+    showOnlyHighLevelPropagations = false
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const overlayContainerRef = useRef<HTMLDivElement>(null);
@@ -200,6 +202,35 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         if (selectedTimeframes && selectedTimeframes.length > 0) {
             filtered = filtered.filter(pred => selectedTimeframes.includes(pred.timeframeId));
+        }
+
+        if (showOnlyHighLevelPropagations && propagations.length > 0) {
+            const propagationIdToMaxLevel = new Map<string, number>();
+
+            propagations.forEach(prop => {
+                const currentMax = propagationIdToMaxLevel.get(prop.propagation_id) || 0;
+                if (prop.propagation_level > currentMax) {
+                    propagationIdToMaxLevel.set(prop.propagation_id, prop.propagation_level);
+                }
+            });
+
+            const highLevelPropagationIds = Array.from(propagationIdToMaxLevel.entries())
+                .filter(([_, maxLevel]) => maxLevel >= 2)
+                .map(([id, _]) => id);
+
+            const validPropagations = propagations.filter(prop =>
+                highLevelPropagationIds.includes(prop.propagation_id)
+            );
+
+            const validPredictionKeys = new Set<string>();
+            validPropagations.forEach(prop => {
+                validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
+            });
+
+            filtered = filtered.filter(pred => {
+                const predKey = `${pred.datetime}|${pred.timeframeId}|${pred.value}`;
+                return validPredictionKeys.has(predKey);
+            });
         }
 
         return filtered;
@@ -634,7 +665,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     useEffect(() => {
         const newArrowPositions = calculateArrowPositions();
         setArrowPositions(newArrowPositions);
-    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights]);
+    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, showOnlyHighLevelPropagations]);
 
     useEffect(() => {
         let resizeObserver: ResizeObserver | null = null;

@@ -50,6 +50,7 @@ const Dashboard: React.FC = () => {
     const [endDate, setEndDate] = useState<string>('');
     const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>([]);
     const [availableTimeframes, setAvailableTimeframes] = useState<string[]>([]);
+    const [showOnlyHighLevelPropagations, setShowOnlyHighLevelPropagations] = useState(false);
 
     const [userSelectedTimeframes, setUserSelectedTimeframes] = useState<TimeframeConfig[]>(
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)
@@ -252,6 +253,16 @@ const Dashboard: React.FC = () => {
                     >
                         <span>All Insights</span>
                     </button>
+
+                    <button
+                        onClick={() => setShowOnlyHighLevelPropagations(prev => !prev)}
+                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showOnlyHighLevelPropagations
+                                ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
+                            }`}
+                    >
+                        <span>Level 2+ Only</span>
+                    </button>
                 </div>
 
                 <div className="flex items-center space-x-4">
@@ -320,6 +331,8 @@ const Dashboard: React.FC = () => {
                                 startDate={startDate}
                                 endDate={endDate}
                                 selectedTimeframes={selectedTimeframes}
+                                propagations={propagations}
+                                showOnlyHighLevelPropagations={showOnlyHighLevelPropagations}
                             />
                         </div>
                         <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">

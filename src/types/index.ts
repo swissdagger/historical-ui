@@ -82,6 +82,13 @@ export interface Propagation {
   lower_freq: string;
 }
 
+export interface InitialIndicator {
+  datetime: string;
+  trend_type: number;
+  timeframe: string;
+  end_datetime: string | null;
+}
+
 export interface ChartContainerProps {
   timeframe: TimeframeConfig;
   height: number;
@@ -95,6 +102,7 @@ export interface ChartContainerProps {
   endDate?: string;
   selectedTimeframes?: string[];
   propagations?: Propagation[];
+  initialIndicators?: InitialIndicator[];
   showOnlyHighLevelPropagations?: boolean;
 }
 

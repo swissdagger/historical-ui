@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
-import { CandlestickData, ChartContainerProps, PredictionEntry, ArrowPosition, Propagation } from '../../types';
+import { CandlestickData, ChartContainerProps, PredictionEntry, ArrowPosition, Propagation, InitialIndicator } from '../../types';
 import { fetchKlineData, subscribeToUpdates, getCurrentData, parseAndValidateTimeframeInput, calculateDataLimit } from '../../api/binanceAPI';
 import { subscribeToPredictionUpdates, getCurrentPredictions, subscribeToViewUpdates, getAvailableTimeframes } from '../../api/sumtymeAPI';
 import PredictionArrow from './PredictionArrow';
@@ -170,6 +170,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     endDate,
     selectedTimeframes,
     propagations = [],
+    initialIndicators = [],
     showOnlyHighLevelPropagations = false
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -223,8 +224,20 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             );
 
             const validPredictionKeys = new Set<string>();
+
             validPropagations.forEach(prop => {
                 validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
+            });
+
+            highLevelPropagationIds.forEach(propId => {
+                const match = propId.match(/^Prop_(\d+)$/);
+                if (match) {
+                    const index = parseInt(match[1], 10) - 1;
+                    if (index >= 0 && index < initialIndicators.length) {
+                        const initialInd = initialIndicators[index];
+                        validPredictionKeys.add(`${initialInd.datetime}|${initialInd.timeframe}|${initialInd.trend_type}`);
+                    }
+                }
             });
 
             filtered = filtered.filter(pred => {
@@ -665,7 +678,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     useEffect(() => {
         const newArrowPositions = calculateArrowPositions();
         setArrowPositions(newArrowPositions);
-    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, showOnlyHighLevelPropagations]);
+    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, initialIndicators, showOnlyHighLevelPropagations]);
 
     useEffect(() => {
         let resizeObserver: ResizeObserver | null = null;

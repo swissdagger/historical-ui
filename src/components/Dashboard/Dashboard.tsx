@@ -332,6 +332,7 @@ const Dashboard: React.FC = () => {
                                 endDate={endDate}
                                 selectedTimeframes={selectedTimeframes}
                                 propagations={propagations}
+                                initialIndicators={initialIndicators}
                                 showOnlyHighLevelPropagations={showOnlyHighLevelPropagations}
                             />
                         </div>

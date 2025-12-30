@@ -103,7 +103,7 @@ export interface ChartContainerProps {
   selectedTimeframes?: string[];
   propagations?: Propagation[];
   initialIndicators?: InitialIndicator[];
-  showOnlyHighLevelPropagations?: boolean;
+  selectedPropagationLevel?: number | null;
 }
 
 export interface PredictionArrowProps {

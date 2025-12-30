@@ -171,7 +171,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     selectedTimeframes,
     propagations = [],
     initialIndicators = [],
-    showOnlyHighLevelPropagations = false
+    selectedPropagationLevel = null
 }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const overlayContainerRef = useRef<HTMLDivElement>(null);
@@ -205,7 +205,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             filtered = filtered.filter(pred => selectedTimeframes.includes(pred.timeframeId));
         }
 
-        if (showOnlyHighLevelPropagations && propagations.length > 0) {
+        if (selectedPropagationLevel !== null && propagations.length > 0) {
             const propagationIdToMaxLevel = new Map<string, number>();
 
             propagations.forEach(prop => {
@@ -215,12 +215,12 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 }
             });
 
-            const highLevelPropagationIds = Array.from(propagationIdToMaxLevel.entries())
-                .filter(([_, maxLevel]) => maxLevel >= 2)
+            const filteredPropagationIds = Array.from(propagationIdToMaxLevel.entries())
+                .filter(([_, maxLevel]) => maxLevel >= selectedPropagationLevel)
                 .map(([id, _]) => id);
 
             const validPropagations = propagations.filter(prop =>
-                highLevelPropagationIds.includes(prop.propagation_id)
+                filteredPropagationIds.includes(prop.propagation_id)
             );
 
             const validPredictionKeys = new Set<string>();
@@ -229,7 +229,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
             });
 
-            highLevelPropagationIds.forEach(propId => {
+            filteredPropagationIds.forEach(propId => {
                 const match = propId.match(/^Prop_(\d+)$/);
                 if (match) {
                     const index = parseInt(match[1], 10) - 1;
@@ -678,7 +678,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     useEffect(() => {
         const newArrowPositions = calculateArrowPositions();
         setArrowPositions(newArrowPositions);
-    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, initialIndicators, showOnlyHighLevelPropagations]);
+    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, initialIndicators, selectedPropagationLevel]);
 
     useEffect(() => {
         let resizeObserver: ResizeObserver | null = null;

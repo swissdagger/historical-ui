@@ -50,7 +50,8 @@ const Dashboard: React.FC = () => {
     const [endDate, setEndDate] = useState<string>('');
     const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>([]);
     const [availableTimeframes, setAvailableTimeframes] = useState<string[]>([]);
-    const [showOnlyHighLevelPropagations, setShowOnlyHighLevelPropagations] = useState(false);
+    const [selectedPropagationLevel, setSelectedPropagationLevel] = useState<number | null>(null);
+    const [showPropagationDropdown, setShowPropagationDropdown] = useState(false);
 
     const [userSelectedTimeframes, setUserSelectedTimeframes] = useState<TimeframeConfig[]>(
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)
@@ -158,13 +159,13 @@ const Dashboard: React.FC = () => {
 
     const currentMetadata = currentFileId ? getCSVMetadata(currentFileId) : null;
 
-    const { initialIndicators, propagations } = useMemo(() => {
+    const { initialIndicators, propagations, maxPropagationLevel } = useMemo(() => {
         if (!currentFileId || !allPredictionsData[currentFileId]) {
-            return { initialIndicators: [], propagations: [] };
+            return { initialIndicators: [], propagations: [], maxPropagationLevel: 0 };
         }
 
         if (selectedTimeframes.length === 0) {
-            return { initialIndicators: [], propagations: [] };
+            return { initialIndicators: [], propagations: [], maxPropagationLevel: 0 };
         }
 
         const filteredPredictions = { ...allPredictionsData[currentFileId] };
@@ -189,7 +190,11 @@ const Dashboard: React.FC = () => {
             });
         }
 
-        return { initialIndicators: filteredInitialIndicators, propagations: filteredPropagations };
+        const maxLevel = filteredPropagations.reduce((max, prop) =>
+            Math.max(max, prop.propagation_level), 0
+        );
+
+        return { initialIndicators: filteredInitialIndicators, propagations: filteredPropagations, maxPropagationLevel: maxLevel };
     }, [currentFileId, allPredictionsData, startDate, endDate, selectedTimeframes, availableTimeframes]);
 
     return (
@@ -244,15 +249,49 @@ const Dashboard: React.FC = () => {
                         <span>All Insights</span>
                     </button>
 
-                    <button
-                        onClick={() => setShowOnlyHighLevelPropagations(prev => !prev)}
-                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showOnlyHighLevelPropagations
-                                ? 'bg-orange-600 text-white hover:bg-orange-700'
-                                : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
-                            }`}
-                    >
-                        <span>Level 2+ Only</span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowPropagationDropdown(prev => !prev)}
+                            className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectedPropagationLevel !== null
+                                    ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                    : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
+                                }`}
+                        >
+                            <span>{selectedPropagationLevel !== null ? `Level ${selectedPropagationLevel}+` : 'All Levels'}</span>
+                            <ChevronDown size={12} />
+                        </button>
+                        {showPropagationDropdown && (
+                            <div className="absolute top-full left-0 mt-1 bg-[#2a2a2a] border border-[#3a3a3a] rounded shadow-lg z-50 min-w-[120px]">
+                                <button
+                                    onClick={() => {
+                                        setSelectedPropagationLevel(null);
+                                        setShowPropagationDropdown(false);
+                                    }}
+                                    className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === null
+                                            ? 'bg-orange-600 text-white'
+                                            : 'text-white hover:bg-[#3a3a3a]'
+                                        }`}
+                                >
+                                    All Levels
+                                </button>
+                                {Array.from({ length: maxPropagationLevel }, (_, i) => i + 1).map((level) => (
+                                    <button
+                                        key={level}
+                                        onClick={() => {
+                                            setSelectedPropagationLevel(level);
+                                            setShowPropagationDropdown(false);
+                                        }}
+                                        className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === level
+                                                ? 'bg-orange-600 text-white'
+                                                : 'text-white hover:bg-[#3a3a3a]'
+                                            }`}
+                                    >
+                                        Level {level}+
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex items-center space-x-4">
@@ -323,7 +362,7 @@ const Dashboard: React.FC = () => {
                                 selectedTimeframes={selectedTimeframes}
                                 propagations={propagations}
                                 initialIndicators={initialIndicators}
-                                showOnlyHighLevelPropagations={showOnlyHighLevelPropagations}
+                                selectedPropagationLevel={selectedPropagationLevel}
                             />
                         </div>
                         <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">

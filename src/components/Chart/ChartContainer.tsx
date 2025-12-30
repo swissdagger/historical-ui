@@ -720,7 +720,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     rightOffset: isMobile ? 5 : 10,
                 },
                 rightPriceScale: {
-                    borderColor: '#000000',
+                    borderColor: '#e5e7eb',
                     borderVisible: true,
                     scaleMargins: {
                         top: 0.05,
@@ -765,7 +765,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             });
 
             const newSeries = newChart.addLineSeries({
-                color: timeframe.color,
+                color: "#000000",
                 lineWidth: lineWidth,
                 crosshairMarkerVisible: true,
                 crosshairMarkerRadius: crosshairRadius,

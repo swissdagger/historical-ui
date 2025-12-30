@@ -130,6 +130,15 @@ export function extractTrendIndicators(
                 const nextSignal = laterSignals[0];
                 const nextSignalDatetime = new Date(nextSignal.datetime);
 
+                // Check if the most recent prediction before currentChainDatetime (excluding 0) is the same as currentType
+                const previousPredictions = nextLowerPredictions
+                    .filter(pred => new Date(pred.datetime) < currentChainDatetime && pred.value !== 0)
+                    .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+
+                if (previousPredictions.length > 0 && previousPredictions[0].value === currentType) {
+                    break;
+                }
+
                 // Check for opposing signal in the highest frequency timeframe
                 const initialFreqPredictions = allPredictions[sortedTimeframes[currentTimeframeIndex]] || [];
                 const opposingSignalValue = -currentType;

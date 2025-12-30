@@ -700,17 +700,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 width: containerWidth,
                 height: containerHeight,
                 layout: {
-                    background: { type: 'solid', color: '#1a1a1a' },
-                    textColor: '#999',
+                    background: { type: 'solid', color: '#ffffff' },
+                    textColor: '#666',
                     fontSize: fontSize,
                     fontFamily: 'Inter, sans-serif',
                 },
                 grid: {
-                    vertLines: { color: '#2a2a2a', style: 1 },
-                    horzLines: { color: '#2a2a2a', style: 1 },
+                    vertLines: { color: '#e5e7eb', style: 1 },
+                    horzLines: { color: '#e5e7eb', style: 1 },
                 },
                 timeScale: {
-                    borderColor: '#2a2a2a',
+                    borderColor: '#e5e7eb',
                     timeVisible: true,
                     secondsVisible: !isMobile, // Hide seconds on mobile for cleaner look
                     borderVisible: true,
@@ -720,7 +720,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     rightOffset: isMobile ? 5 : 10,
                 },
                 rightPriceScale: {
-                    borderColor: '#2a2a2a',
+                    borderColor: '#e5e7eb',
                     borderVisible: true,
                     scaleMargins: {
                         top: 0.05,
@@ -732,16 +732,16 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 crosshair: {
                     mode: 1,
                     vertLine: {
-                        color: '#555',
+                        color: '#9ca3af',
                         width: 1,
                         style: 2,
-                        labelBackgroundColor: '#1a1a1a',
+                        labelBackgroundColor: '#ffffff',
                     },
                     horzLine: {
-                        color: '#555',
+                        color: '#9ca3af',
                         width: 1,
                         style: 2,
-                        labelBackgroundColor: '#1a1a1a',
+                        labelBackgroundColor: '#ffffff',
                     },
                 },
                 handleScroll: {
@@ -952,8 +952,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     }, [symbol, timeframe.binanceInterval, showHistoricalPerformance]);
 
     return (
-        <div className="relative h-full bg-[#1a1a1a]">
-            <div className="h-5 md:h-6 border-b border-[#2a2a2a] px-1 md:px-2 flex items-center justify-between text-[8px] md:text-[8px]">
+        <div className="relative h-full bg-white">
+            <div className="h-5 md:h-6 border-b border-gray-200 px-1 md:px-2 flex items-center justify-between text-[8px] md:text-[8px]">
                 <div className="flex items-center flex-1">
                     {isEditingTimeframe ? (
                         <div className="flex flex-col">
@@ -963,17 +963,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                 onChange={handleTimeframeInputChange}
                                 onBlur={handleTimeframeInputSubmit}
                                 onKeyDown={handleTimeframeInputKeyDown}
-                                className="bg-[#2a2a2a] text-white text-[8px] md:text-[10px] px-1 py-0.5 rounded border border-[#3a3a3a] focus:border-blue-500 focus:outline-none w-16 md:w-20"
+                                className="bg-white text-gray-900 text-[8px] md:text-[10px] px-1 py-0.5 rounded border border-gray-300 focus:border-blue-500 focus:outline-none w-16 md:w-20"
                                 autoFocus
                             />
                             {timeframeInputError && (
-                                <span className="text-red-400 text-[6px] md:text-[8px] mt-0.5">{timeframeInputError}</span>
+                                <span className="text-red-600 text-[6px] md:text-[8px] mt-0.5">{timeframeInputError}</span>
                             )}
                         </div>
                     ) : (
                         <button
                             onClick={() => setIsEditingTimeframe(true)}
-                            className="text-[#999] font-medium hover:text-white transition-colors text-[8px] md:text-[10px]"
+                            className="text-gray-600 font-medium hover:text-gray-900 transition-colors text-[8px] md:text-[10px]"
                         >
                             {timeframe.label}
                         </button>
@@ -981,11 +981,11 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 </div>
                 {lastPrice && (
                     <div className="flex items-center space-x-1 md:space-x-2">
-                        <span className="text-[#999] hidden sm:inline">O {lastPrice.open.toFixed(2)}</span>
-                        <span className="text-[#999]">
-                            <span className="inline-block w-[2px] h-[2px] bg-green-500 rounded-full align-middle mr-1"></span>
+                        <span className="text-gray-600 hidden sm:inline">O {lastPrice.open.toFixed(2)}</span>
+                        <span className="text-gray-600">
+                            <span className="inline-block w-[2px] h-[2px] bg-green-600 rounded-full align-middle mr-1"></span>
                             positive insight &nbsp;
-                            <span className="inline-block w-[2px] h-[2px] bg-red-500 rounded-full align-middle mr-1"></span>
+                            <span className="inline-block w-[2px] h-[2px] bg-red-600 rounded-full align-middle mr-1"></span>
                             negative insight
                         </span>
                     </div>
@@ -1021,17 +1021,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                             left: `${position.x + 1}px`,
                                             top: `${position.y - 20}px`,
                                             transform: 'translate(-50%, -100%)',
-                                            color: '#999',
+                                            color: '#374151',
                                             fontSize: '8px',
                                             fontWeight: 'bold',
-                                            textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
+                                            textShadow: '1px 1px 2px rgba(255, 255, 255, 0.8)',
                                             zIndex: 3,
                                             pointerEvents: 'none',
                                             fontFamily: 'monospace',
-                                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
                                             padding: '2px 4px',
                                             borderRadius: '2px',
-                                            border: '1px solid #555',
+                                            border: '1px solid #d1d5db',
                                             whiteSpace: 'nowrap'
                                         }}
                                         title={`Change ending period: ${position.datetime} to ${position.endTime}`}

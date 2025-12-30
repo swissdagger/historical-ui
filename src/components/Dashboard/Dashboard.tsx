@@ -198,8 +198,8 @@ const Dashboard: React.FC = () => {
     }, [currentFileId, allPredictionsData, startDate, endDate, selectedTimeframes, availableTimeframes]);
 
     return (
-        <div className="bg-[#1a1a1a]">
-            <div className="flex items-center justify-between bg-[#1a1a1a] border-b border-[#2a2a2a] px-2 py-0.5 md:px-4 md:py-1 sticky top-0 z-20">
+        <div className="bg-white">
+            <div className="flex items-center justify-between bg-white border-b border-gray-200 px-2 py-0.5 md:px-4 md:py-1 sticky top-0 z-20">
                 <div className="flex items-center space-x-2">
                     <div className="relative">
                         <button
@@ -211,19 +211,19 @@ const Dashboard: React.FC = () => {
                             <ChevronDown size={12} />
                         </button>
                         {showFileDropdown && (
-                            <div className="absolute top-full left-0 mt-1 bg-[#2a2a2a] border border-[#3a3a3a] rounded shadow-lg z-50 min-w-[200px]">
+                            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-[200px]">
                                 {availableFiles.length > 0 ? (
                                     availableFiles.map((filename) => (
                                         <button
                                             key={filename}
                                             onClick={() => handleFileSelect(filename)}
-                                            className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#3a3a3a] transition-colors"
+                                            className="w-full text-left px-3 py-2 text-xs text-gray-900 hover:bg-gray-100 transition-colors"
                                         >
                                             {getDisplayName(filename)}
                                         </button>
                                     ))
                                 ) : (
-                                    <div className="px-3 py-2 text-xs text-[#666]">
+                                    <div className="px-3 py-2 text-xs text-gray-500">
                                         No files available
                                     </div>
                                 )}
@@ -233,7 +233,7 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white transition-colors"
+                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
                     >
                         <Info size={12} />
                         <span>Info</span>
@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
                         onClick={() => setShowAllInsights(prev => !prev)}
                         className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
                                 ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
                             }`}
                     >
                         <span>All Insights</span>
@@ -254,14 +254,14 @@ const Dashboard: React.FC = () => {
                             onClick={() => setShowPropagationDropdown(prev => !prev)}
                             className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectedPropagationLevel !== null
                                     ? 'bg-orange-600 text-white hover:bg-orange-700'
-                                    : 'bg-[#2a2a2a] text-[#999] hover:bg-[#3a3a3a] hover:text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
                                 }`}
                         >
                             <span>{selectedPropagationLevel !== null ? `Level ${selectedPropagationLevel}+` : 'All Levels'}</span>
                             <ChevronDown size={12} />
                         </button>
                         {showPropagationDropdown && (
-                            <div className="absolute top-full left-0 mt-1 bg-[#2a2a2a] border border-[#3a3a3a] rounded shadow-lg z-50 min-w-[120px]">
+                            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 min-w-[120px]">
                                 <button
                                     onClick={() => {
                                         setSelectedPropagationLevel(null);
@@ -269,7 +269,7 @@ const Dashboard: React.FC = () => {
                                     }}
                                     className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === null
                                             ? 'bg-orange-600 text-white'
-                                            : 'text-white hover:bg-[#3a3a3a]'
+                                            : 'text-gray-900 hover:bg-gray-100'
                                         }`}
                                 >
                                     All Levels
@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
                                         }}
                                         className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === level
                                                 ? 'bg-orange-600 text-white'
-                                                : 'text-white hover:bg-[#3a3a3a]'
+                                                : 'text-gray-900 hover:bg-gray-100'
                                             }`}
                                     >
                                         Level {level}+
@@ -297,7 +297,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     {currentMetadata && (
                         <div className="flex items-center space-x-2 text-xs">
-                            <span className="text-[#999]">{currentMetadata.rowCount.toLocaleString()} rows</span>
+                            <span className="text-gray-600">{currentMetadata.rowCount.toLocaleString()} rows</span>
                         </div>
                     )}
                 </div>
@@ -305,24 +305,24 @@ const Dashboard: React.FC = () => {
 
             {showInfoModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg max-w-5xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]">
-                            <h2 className="text-white text-lg font-semibold">CSV Visualization Tool</h2>
+                    <div className="bg-white border border-gray-200 rounded-lg max-w-5xl w-full max-h-[80vh] overflow-y-auto">
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                            <h2 className="text-gray-900 text-lg font-semibold">CSV Visualization Tool</h2>
                             <button
                                 onClick={() => setShowInfoModal(false)}
-                                className="text-[#999] hover:text-white transition-colors"
+                                className="text-gray-600 hover:text-gray-900 transition-colors"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4 text-[#ccc] leading-relaxed">
-                            <p className="text-white font-medium">
+                        <div className="p-6 space-y-4 text-gray-700 leading-relaxed">
+                            <p className="text-gray-900 font-medium">
                                 This tool visualises historical data from CSV files with forecasts from sumtyme.ai's Causal Intelligence Layer.
                             </p>
 
-                            <div className="pt-4 border-t border-[#2a2a2a]">
-                                <h3 className="text-white font-medium mb-2">How to Use</h3>
+                            <div className="pt-4 border-t border-gray-200">
+                                <h3 className="text-gray-900 font-medium mb-2">How to Use</h3>
                                 <ol className="list-decimal list-inside space-y-1 text-sm">
                                     <li>Select a file from the dropdown to load data</li>
                                     <li>Use date range and timeframe filters to focus on specific periods</li>
@@ -331,8 +331,8 @@ const Dashboard: React.FC = () => {
                                 </ol>
                             </div>
 
-                            <div className="pt-4 border-t border-[#2a2a2a]">
-                                <h3 className="text-white font-medium mb-2">Visualisation</h3>
+                            <div className="pt-4 border-t border-gray-200">
+                                <h3 className="text-gray-900 font-medium mb-2">Visualisation</h3>
                                 <p className="text-sm">
                                     The chart displays the open price as a line. Green dots represent positive causal chain insights,
                                     whilst red dots represent negative causal chain insights. Forecasts are plotted at the open price of
@@ -346,8 +346,8 @@ const Dashboard: React.FC = () => {
 
             <div className="pb-8">
                 {currentFileId ? (
-                    <div className="bg-[#1a1a1a]">
-                        <div className="bg-[#1a1a1a]" style={{ height: '100vh' }}>
+                    <div className="bg-white">
+                        <div className="bg-white" style={{ height: '100vh' }}>
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
                                 height={window.innerHeight}
@@ -365,29 +365,29 @@ const Dashboard: React.FC = () => {
                                 selectedPropagationLevel={selectedPropagationLevel}
                             />
                         </div>
-                        <div className="bg-[#1a1a1a] border-t border-[#2a2a2a] p-4">
+                        <div className="bg-white border-t border-gray-200 p-4">
                             <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
-                                    <Calendar size={14} className="text-[#999]" />
-                                    <label className="text-white text-xs font-medium">Datetime Range:</label>
+                                    <Calendar size={14} className="text-gray-600" />
+                                    <label className="text-gray-900 text-xs font-medium">Datetime Range:</label>
                                     <input
                                         type="text"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
+                                        className="px-2 py-1 text-xs bg-white text-gray-900 border border-gray-300 rounded focus:outline-none focus:border-blue-600 font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
-                                    <span className="text-[#999]">to</span>
+                                    <span className="text-gray-600">to</span>
                                     <input
                                         type="text"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-[#2a2a2a] text-white border border-[#3a3a3a] rounded focus:outline-none focus:border-blue-600 font-mono"
+                                        className="px-2 py-1 text-xs bg-white text-gray-900 border border-gray-300 rounded focus:outline-none focus:border-blue-600 font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <label className="text-white text-xs font-medium">Timeframes:</label>
+                                    <label className="text-gray-900 text-xs font-medium">Timeframes:</label>
                                     <MultiSelect
                                         options={availableTimeframes}
                                         value={selectedTimeframes}
@@ -398,32 +398,32 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <div className="mb-6">
-                                <h3 className="text-white font-medium mb-3 text-sm">Initial Indicators</h3>
+                                <h3 className="text-gray-900 font-medium mb-3 text-sm">Initial Indicators</h3>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
-                                            <tr className="bg-[#2a2a2a]">
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Datetime</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Value</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Timeframe</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">End Datetime</th>
+                                            <tr className="bg-gray-100">
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Datetime</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Value</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Timeframe</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">End Datetime</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
-                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono text-white">{ind.datetime}</td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1">
-                                                        <span className={ind.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
+                                                <tr key={idx} className="hover:bg-gray-50">
+                                                    <td className="border border-gray-300 px-2 py-1 font-mono text-gray-900">{ind.datetime}</td>
+                                                    <td className="border border-gray-300 px-2 py-1">
+                                                        <span className={ind.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
                                                             {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{ind.timeframe}</td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono text-white">{ind.end_datetime || 'N/A'}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{ind.timeframe}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 font-mono text-gray-900">{ind.end_datetime || 'N/A'}</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={4} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
+                                                    <td colSpan={4} className="border border-gray-300 px-2 py-3 text-center text-gray-500">
                                                         No initial indicators found
                                                     </td>
                                                 </tr>
@@ -434,36 +434,36 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <div>
-                                <h3 className="text-white font-medium mb-3 text-sm">Propagations</h3>
+                                <h3 className="text-gray-900 font-medium mb-3 text-sm">Propagations</h3>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
-                                            <tr className="bg-[#2a2a2a]">
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Prop ID</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Level</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Datetime</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Value</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Higher Freq</th>
-                                                <th className="border border-[#3a3a3a] px-2 py-1 text-left text-white font-medium">Lower Freq</th>
+                                            <tr className="bg-gray-100">
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Prop ID</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Level</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Datetime</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Value</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Higher Freq</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Lower Freq</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {propagations.length > 0 ? propagations.map((prop, idx) => (
-                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.propagation_id}</td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.propagation_level}</td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 font-mono text-white">{prop.datetime}</td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1">
-                                                        <span className={prop.trend_type > 0 ? 'text-green-500' : 'text-red-500'}>
+                                                <tr key={idx} className="hover:bg-gray-50">
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.propagation_id}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.propagation_level}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 font-mono text-gray-900">{prop.datetime}</td>
+                                                    <td className="border border-gray-300 px-2 py-1">
+                                                        <span className={prop.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
                                                             {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.higher_freq}</td>
-                                                    <td className="border border-[#3a3a3a] px-2 py-1 text-white">{prop.lower_freq}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.higher_freq}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.lower_freq}</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={6} className="border border-[#3a3a3a] px-2 py-3 text-center text-[#666]">
+                                                    <td colSpan={6} className="border border-gray-300 px-2 py-3 text-center text-gray-500">
                                                         No propagations found
                                                     </td>
                                                 </tr>
@@ -477,9 +477,9 @@ const Dashboard: React.FC = () => {
                 ) : (
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center">
-                            <File className="mx-auto mb-4 text-[#666]" size={64} />
-                            <h2 className="text-white text-xl mb-2">No CSV File Loaded</h2>
-                            <p className="text-[#999] mb-4">Select a file from the dropdown to begin</p>
+                            <File className="mx-auto mb-4 text-gray-400" size={64} />
+                            <h2 className="text-gray-900 text-xl mb-2">No CSV File Loaded</h2>
+                            <p className="text-gray-600 mb-4">Select a file from the dropdown to begin</p>
                         </div>
                     </div>
                 )}

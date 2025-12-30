@@ -14,7 +14,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#2a2a2a]">
+    <div className="min-h-screen bg-white">
       <main>
         <Dashboard />
       </main>

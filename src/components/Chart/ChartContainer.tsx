@@ -442,7 +442,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     }
                 } else {
                     // Non-zero prediction found, check if we had a gap
-                    if (consecutiveZeros >= 3 && gapStartTime) {
+                    if (consecutiveZeros >= 1000 && gapStartTime) {
                         // Calculate end time of the gap
                         const gapStart = new Date(gapStartTime.replace(' ', 'T') + 'Z');
                         const gapEnd = new Date(gapStart.getTime() + (consecutiveZeros * intervalMinutes * 60 * 1000));

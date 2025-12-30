@@ -701,7 +701,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 height: containerHeight,
                 layout: {
                     background: { type: 'solid', color: '#ffffff' },
-                    textColor: '#665',
+                    textColor: '#666',
                     fontSize: fontSize,
                     fontFamily: 'Inter, sans-serif',
                 },
@@ -738,7 +738,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                         labelBackgroundColor: '#ffffff',
                     },
                     horzLine: {
-                        color: '#9ca3af',
+                        color: '#000000',
                         width: 1,
                         style: 2,
                         labelBackgroundColor: '#ffffff',
@@ -765,7 +765,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             });
 
             const newSeries = newChart.addLineSeries({
-                color: "#000000",
+                color: timeframe.color,
                 lineWidth: lineWidth,
                 crosshairMarkerVisible: true,
                 crosshairMarkerRadius: crosshairRadius,

@@ -1022,7 +1022,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                             top: `${position.y - 20}px`,
                                             transform: 'translate(-50%, -100%)',
                                             color: '#374151',
-                                            fontSize: '8px',
+                                            fontSize: '12px',
                                             fontWeight: 'bold',
                                             textShadow: '1px 1px 2px rgba(255, 255, 255, 0.8)',
                                             zIndex: 3,

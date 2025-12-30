@@ -738,7 +738,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                         labelBackgroundColor: '#ffffff',
                     },
                     horzLine: {
-                        color: '#000000',
+                        color: '#9ca3af',
                         width: 1,
                         style: 2,
                         labelBackgroundColor: '#ffffff',

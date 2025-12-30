@@ -35,10 +35,16 @@ function timeframeToSeconds(timeframe: string): number {
 }
 
 export function extractTrendIndicators(
-    allPredictions: Record<string, PredictionEntry[]>
+    allPredictions: Record<string, PredictionEntry[]>,
+    selectedTimeframes: string[] = []
 ): { initialIndicators: InitialIndicator[], propagations: Propagation[] } {
-    const timeframes = Object.keys(allPredictions);
-    const sortedTimeframes = timeframes.sort((a, b) => timeframeToSeconds(a) - timeframeToSeconds(b));
+    const allTimeframes = Object.keys(allPredictions);
+
+    const timeframesToUse = selectedTimeframes.length > 0
+        ? allTimeframes.filter(tf => selectedTimeframes.includes(tf))
+        : allTimeframes;
+
+    const sortedTimeframes = timeframesToUse.sort((a, b) => timeframeToSeconds(a) - timeframeToSeconds(b));
 
     if (sortedTimeframes.length === 0) {
         return { initialIndicators: [], propagations: [] };

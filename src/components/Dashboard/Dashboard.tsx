@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
 
         const filteredPredictions = { ...allPredictionsData[currentFileId] };
 
-        const result = extractTrendIndicators(filteredPredictions);
+        const result = extractTrendIndicators(filteredPredictions, selectedTimeframes);
 
         let filteredInitialIndicators = result.initialIndicators;
         let filteredPropagations = result.propagations;
@@ -187,16 +187,6 @@ const Dashboard: React.FC = () => {
                 const propDate = new Date(prop.datetime.replace(' ', 'T') + 'Z');
                 return propDate >= start && propDate <= end;
             });
-        }
-
-        if (selectedTimeframes.length > 0 && selectedTimeframes.length < availableTimeframes.length) {
-            filteredInitialIndicators = filteredInitialIndicators.filter(ind =>
-                selectedTimeframes.includes(ind.timeframe)
-            );
-
-            filteredPropagations = filteredPropagations.filter(prop =>
-                selectedTimeframes.includes(prop.higher_freq) || selectedTimeframes.includes(prop.lower_freq)
-            );
         }
 
         return { initialIndicators: filteredInitialIndicators, propagations: filteredPropagations };

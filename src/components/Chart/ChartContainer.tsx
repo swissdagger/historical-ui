@@ -1024,7 +1024,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                             color: '#374151',
                                             fontSize: '12px',
                                             fontWeight: 'bold',
-                                            textShadow: '1px 1px 2px rgba(255, 255, 255, 0.8)',
                                             zIndex: 3,
                                             pointerEvents: 'none',
                                             fontFamily: 'monospace',

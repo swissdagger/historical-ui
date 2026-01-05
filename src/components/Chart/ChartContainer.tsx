@@ -700,17 +700,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 width: containerWidth,
                 height: containerHeight,
                 layout: {
-                    background: { type: 'solid', color: '#292929' },
-                    textColor: '#e0e0e0',
+                    background: { type: 'solid', color: '#ffffff' },
+                    textColor: '#666',
                     fontSize: fontSize,
                     fontFamily: 'Inter, sans-serif',
                 },
                 grid: {
-                    vertLines: { color: '#919191', style: 1 },
-                    horzLines: { color: '#919191', style: 1 },
+                    vertLines: { color: '#e5e7eb', style: 1 },
+                    horzLines: { color: '#e5e7eb', style: 1 },
                 },
                 timeScale: {
-                    borderColor: '#242424',
+                    borderColor: '#e5e7eb',
                     timeVisible: true,
                     secondsVisible: !isMobile, // Hide seconds on mobile for cleaner look
                     borderVisible: true,
@@ -720,10 +720,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     rightOffset: isMobile ? 5 : 10,
                 },
                 rightPriceScale: {
-                    borderColor: '#242424',
+                    borderColor: '#e5e7eb',
                     borderVisible: true,
                     scaleMargins: {
-                        top: 0.55,
+                        top: 0.05,
                         bottom: isMobile ? 0.1 : 0.15,
                     },
                     visible: true,
@@ -732,16 +732,16 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 crosshair: {
                     mode: 1,
                     vertLine: {
-                        color: '#e0e0e0',
+                        color: '#9ca3af',
                         width: 1,
                         style: 2,
-                        labelBackgroundColor: '#242424',
+                        labelBackgroundColor: '#ffffff',
                     },
                     horzLine: {
-                        color: '#e0e0e0',
+                        color: '#000000',
                         width: 1,
                         style: 2,
-                        labelBackgroundColor: '#242424',
+                        labelBackgroundColor: '#ffffff',
                     },
                 },
                 handleScroll: {
@@ -952,8 +952,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     }, [symbol, timeframe.binanceInterval, showHistoricalPerformance]);
 
     return (
-        <div className="relative h-full bg-gray">
-            <div className="h-5 md:h-6 border-b border-[#919191] px-1 md:px-2 flex items-center justify-between text-[8px] md:text-[8px]">
+        <div className="relative h-full bg-white">
+            <div className="h-5 md:h-6 border-b border-gray-200 px-1 md:px-2 flex items-center justify-between text-[8px] md:text-[8px]">
                 <div className="flex items-center flex-1">
                     {isEditingTimeframe ? (
                         <div className="flex flex-col">
@@ -963,7 +963,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                 onChange={handleTimeframeInputChange}
                                 onBlur={handleTimeframeInputSubmit}
                                 onKeyDown={handleTimeframeInputKeyDown}
-                                className="bg-white text-[#e0e0e0] text-[8px] md:text-[10px] px-1 py-0.5 rounded border border-[#919191] focus:border-blue-500 focus:outline-none w-16 md:w-20"
+                                className="bg-white text-gray-900 text-[8px] md:text-[10px] px-1 py-0.5 rounded border border-gray-300 focus:border-blue-500 focus:outline-none w-16 md:w-20"
                                 autoFocus
                             />
                             {timeframeInputError && (
@@ -973,7 +973,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     ) : (
                         <button
                             onClick={() => setIsEditingTimeframe(true)}
-                            className="text-[#e0e0e0] font-medium hover:text-gray-900 transition-colors text-[8px] md:text-[10px]"
+                            className="text-gray-600 font-medium hover:text-gray-900 transition-colors text-[8px] md:text-[10px]"
                         >
                             {timeframe.label}
                         </button>
@@ -981,8 +981,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 </div>
                 {lastPrice && (
                     <div className="flex items-center space-x-1 md:space-x-2">
-                        <span className="text-[#e0e0e0] hidden sm:inline">O {lastPrice.open.toFixed(2)}</span>
-                        <span className="text-[#e0e0e0]">
+                        <span className="text-gray-600 hidden sm:inline">O {lastPrice.open.toFixed(2)}</span>
+                        <span className="text-gray-600">
                             <span className="inline-block w-[2px] h-[2px] bg-green-600 rounded-full align-middle mr-1"></span>
                             positive insight &nbsp;
                             <span className="inline-block w-[2px] h-[2px] bg-red-600 rounded-full align-middle mr-1"></span>
@@ -993,10 +993,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             </div>
             <div className="relative h-[calc(100%-20px)] md:h-[calc(100%-24px)]">
                 {/* Chart container - managed by lightweight-charts */}
-                <div ref={chartContainerRef} className="absolute inset-0" />
+                <div ref={chartContainerRef} className="absolute inset-0 p-0.5" />
 
                 {/* Overlay container - managed by React for PredictionArrows */}
-                <div ref={overlayContainerRef} className="absolute inset-0 pointer-events-none">
+                <div ref={overlayContainerRef} className="absolute inset-0 p-0.5 pointer-events-none">
                     {(() => {
                         // Group arrow positions by datetime to identify overlapping timeframes
                         const positionsByDatetime = new Map<string, ArrowPosition[]>();
@@ -1029,8 +1029,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                             fontFamily: 'monospace',
                                             backgroundColor: 'rgba(255, 255, 255, 0.9)',
                                             padding: '2px 4px',
-                                            borderRadius: '1px',
-                                            border: '1px solid #919191',
+                                            borderRadius: '2px',
+                                            border: '1px solid #d1d5db',
                                             whiteSpace: 'nowrap'
                                         }}
                                         title={`Change ending period: ${position.datetime} to ${position.endTime}`}

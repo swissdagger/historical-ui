@@ -14,7 +14,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#242424' }}>
+    <div className="min-h-screen bg-white">
       <main>
         <Dashboard />
       </main>

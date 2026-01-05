@@ -715,7 +715,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     secondsVisible: !isMobile, // Hide seconds on mobile for cleaner look
                     borderVisible: true,
                     fixLeftEdge: fixLeftEdge,
-                    fixRightEdge: false,
+                    fixRightEdge: true,
                     visible: true,
                     rightOffset: isMobile ? 5 : 10,
                 },

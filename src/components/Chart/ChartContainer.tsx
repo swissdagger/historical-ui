@@ -720,7 +720,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     rightOffset: isMobile ? 5 : 10,
                 },
                 rightPriceScale: {
-                    borderColor: '#919191',
+                    borderColor: '#FFFFFF',
                     borderVisible: true,
                     scaleMargins: {
                         top: 0.05,

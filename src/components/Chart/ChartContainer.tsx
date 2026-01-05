@@ -982,7 +982,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 {lastPrice && (
                     <div className="flex items-center space-x-1 md:space-x-2">
                         <span className="text-[#e0e0e0] hidden sm:inline">O {lastPrice.open.toFixed(2)}</span>
-                        <span className="text-gray-600">
+                        <span className="text-[#e0e0e0]">
                             <span className="inline-block w-[2px] h-[2px] bg-green-600 rounded-full align-middle mr-1"></span>
                             positive insight &nbsp;
                             <span className="inline-block w-[2px] h-[2px] bg-red-600 rounded-full align-middle mr-1"></span>

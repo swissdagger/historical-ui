@@ -66,7 +66,7 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         top: `${position.y - 20}px`,
         transform: 'translate(-50%, -100%)',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
+        color: '#919191',
         padding: '4px 8px',
         borderRadius: '4px',
         fontSize: '12px',

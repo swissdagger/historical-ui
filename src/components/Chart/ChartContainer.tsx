@@ -723,7 +723,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     borderColor: '#242424',
                     borderVisible: true,
                     scaleMargins: {
-                        top: 0.05,
+                        top: 0.55,
                         bottom: isMobile ? 0.1 : 0.15,
                     },
                     visible: true,

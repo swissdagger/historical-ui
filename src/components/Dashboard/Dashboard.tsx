@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
                     <button
                         onClick={() => setShowAllInsights(prev => !prev)}
                         className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
-                                ? 'bg-292929 text-black hover:bg-gray-200'
+                                ? 'bg-[#292929] text-black hover:bg-gray-200'
                                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
                             }`}
                     >

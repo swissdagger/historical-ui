@@ -80,6 +80,8 @@ export interface Propagation {
   trend_type: number;
   higher_freq: string;
   lower_freq: string;
+  open_price: number;
+  directional_change_percent: number;
 }
 
 export interface InitialIndicator {
@@ -87,6 +89,8 @@ export interface InitialIndicator {
   trend_type: number;
   timeframe: string;
   end_datetime: string | null;
+  open_price: number;
+  directional_change_percent: number;
 }
 
 export interface ChartContainerProps {

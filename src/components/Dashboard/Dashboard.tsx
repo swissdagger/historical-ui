@@ -5,7 +5,7 @@ import { setSixteenTimesMode, subscribeToPredictionUpdates, loadPredictionsForTi
 import { TimeframeConfig, PredictionEntry } from '../../types';
 import { SUPPORTED_PREDICTION_INTERVALS } from '../../api/sumtymeAPI';
 import { Info, X, File, ChevronDown, Calendar } from 'lucide-react';
-import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile } from '../../services/csvService';
+import { getCSVMetadata, loadCSVFile, listLocalCSVFiles, loadLocalCSVFile, getCSVData } from '../../services/csvService';
 import { extractTrendIndicators, InitialIndicator, Propagation } from '../../utils/indicatorAnalysis';
 import { getDisplayName } from '../../config/fileConfig';
 import { MultiSelect } from '../common/MultiSelect';
@@ -169,8 +169,9 @@ const Dashboard: React.FC = () => {
         }
 
         const filteredPredictions = { ...allPredictionsData[currentFileId] };
+        const csvData = getCSVData(currentFileId);
 
-        const result = extractTrendIndicators(filteredPredictions, selectedTimeframes);
+        const result = extractTrendIndicators(filteredPredictions, selectedTimeframes, csvData);
 
         let filteredInitialIndicators = result.initialIndicators;
         let filteredPropagations = result.propagations;
@@ -407,6 +408,8 @@ const Dashboard: React.FC = () => {
                                                 <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Value</th>
                                                 <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Timeframe</th>
                                                 <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">End Datetime</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Open Price</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Directional Change %</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -420,10 +423,12 @@ const Dashboard: React.FC = () => {
                                                     </td>
                                                     <td className="border border-gray-300 px-2 py-1 text-gray-900">{ind.timeframe}</td>
                                                     <td className="border border-gray-300 px-2 py-1 font-mono text-gray-900">{ind.end_datetime || 'N/A'}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{ind.open_price.toFixed(2)}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{ind.directional_change_percent.toFixed(2)}%</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={4} className="border border-gray-300 px-2 py-3 text-center text-gray-500">
+                                                    <td colSpan={6} className="border border-gray-300 px-2 py-3 text-center text-gray-500">
                                                         No initial indicators found
                                                     </td>
                                                 </tr>
@@ -445,6 +450,8 @@ const Dashboard: React.FC = () => {
                                                 <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Value</th>
                                                 <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Higher Freq</th>
                                                 <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Lower Freq</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Open Price</th>
+                                                <th className="border border-gray-300 px-2 py-1 text-left text-gray-900 font-medium">Directional Change %</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -460,10 +467,16 @@ const Dashboard: React.FC = () => {
                                                     </td>
                                                     <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.higher_freq}</td>
                                                     <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.lower_freq}</td>
+                                                    <td className="border border-gray-300 px-2 py-1 text-gray-900">{prop.open_price.toFixed(2)}</td>
+                                                    <td className="border border-gray-300 px-2 py-1">
+                                                        <span className={prop.directional_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                            {prop.directional_change_percent.toFixed(2)}%
+                                                        </span>
+                                                    </td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={6} className="border border-gray-300 px-2 py-3 text-center text-gray-500">
+                                                    <td colSpan={8} className="border border-gray-300 px-2 py-3 text-center text-gray-500">
                                                         No propagations found
                                                     </td>
                                                 </tr>

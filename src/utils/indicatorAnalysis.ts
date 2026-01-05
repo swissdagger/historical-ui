@@ -1,10 +1,12 @@
-import { PredictionEntry } from '../types';
+import { PredictionEntry, CandlestickData } from '../types';
 
 export interface InitialIndicator {
     datetime: string;
     trend_type: number;
     timeframe: string;
     end_datetime: string | null;
+    open_price: number;
+    directional_change_percent: number;
 }
 
 export interface Propagation {
@@ -14,6 +16,8 @@ export interface Propagation {
     trend_type: number;
     higher_freq: string;
     lower_freq: string;
+    open_price: number;
+    directional_change_percent: number;
 }
 
 function timeframeToSeconds(timeframe: string): number {
@@ -34,9 +38,16 @@ function timeframeToSeconds(timeframe: string): number {
     }
 }
 
+function getOpenPriceAtDatetime(csvData: CandlestickData[], datetime: string): number {
+    const targetTime = new Date(datetime.replace(' ', 'T') + 'Z').getTime() / 1000;
+    const candle = csvData.find(c => c.time === targetTime);
+    return candle?.open || 0;
+}
+
 export function extractTrendIndicators(
     allPredictions: Record<string, PredictionEntry[]>,
-    selectedTimeframes: string[] = []
+    selectedTimeframes: string[] = [],
+    csvData: CandlestickData[] = []
 ): { initialIndicators: InitialIndicator[], propagations: Propagation[] } {
     const allTimeframes = Object.keys(allPredictions);
 
@@ -65,11 +76,14 @@ export function extractTrendIndicators(
     for (const pred of sortedPredictions) {
         if (pred.value !== 0) {
             if (lastSignal === null || pred.value !== lastSignal) {
+                const openPrice = getOpenPriceAtDatetime(csvData, pred.datetime);
                 initialIndicators.push({
                     datetime: pred.datetime,
                     trend_type: pred.value,
                     timeframe: highestFreqTimeframe,
-                    end_datetime: null
+                    end_datetime: null,
+                    open_price: openPrice,
+                    directional_change_percent: 0
                 });
                 lastSignal = pred.value;
             }
@@ -103,6 +117,7 @@ export function extractTrendIndicators(
         const currentType = initialInd.trend_type;
         const currentTimeframeIndex = sortedTimeframes.indexOf(initialInd.timeframe);
         const endDatetime = initialInd.end_datetime ? new Date(initialInd.end_datetime) : null;
+        const initialOpenPrice = initialInd.open_price;
 
         if (!endDatetime) continue;
 
@@ -152,13 +167,20 @@ export function extractTrendIndicators(
 
                 if (!opposingSignalFound) {
                     propagationLevel++;
+                    const propOpenPrice = getOpenPriceAtDatetime(csvData, nextSignal.datetime);
+                    const directionalChange = initialOpenPrice !== 0
+                        ? ((propOpenPrice - initialOpenPrice) / initialOpenPrice) * 100
+                        : 0;
+
                     propagations.push({
                         propagation_id: currentPropagationId,
                         propagation_level: propagationLevel,
                         datetime: nextSignal.datetime,
                         trend_type: currentType,
                         higher_freq: sortedTimeframes[currentChainTimeframeIndex],
-                        lower_freq: nextLowerTimeframe
+                        lower_freq: nextLowerTimeframe,
+                        open_price: propOpenPrice,
+                        directional_change_percent: directionalChange
                     });
 
                     currentChainDatetime = nextSignalDatetime;

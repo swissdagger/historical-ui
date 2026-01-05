@@ -351,7 +351,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     {currentMetadata && (
                         <div className="flex items-center space-x-2 text-xs">
-                            <span style={{ color: '#919191' }}>{currentMetadata.rowCount.toLocaleString()} rows</span>
+                            <span style={{ color: '#e0e0e0' }}>{currentMetadata.rowCount.toLocaleString()} rows</span>
                         </div>
                     )}
                 </div>

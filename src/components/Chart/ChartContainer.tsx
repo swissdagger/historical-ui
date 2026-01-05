@@ -953,7 +953,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
     return (
         <div className="relative h-full bg-gray">
-            <div className="h-5 md:h-6 border-b border-gray-200 px-1 md:px-2 flex items-center justify-between text-[8px] md:text-[8px]">
+            <div className="h-5 md:h-6 border-b border-[#e0e0e0] px-1 md:px-2 flex items-center justify-between text-[8px] md:text-[8px]">
                 <div className="flex items-center flex-1">
                     {isEditingTimeframe ? (
                         <div className="flex flex-col">

@@ -199,32 +199,38 @@ const Dashboard: React.FC = () => {
     }, [currentFileId, allPredictionsData, startDate, endDate, selectedTimeframes, availableTimeframes]);
 
     return (
-        <div className="bg-black">
-            <div className="flex items-center justify-between bg-black border-b border-gray-800 px-2 py-0.5 md:px-4 md:py-1 sticky top-0 z-20">
+        <div style={{ backgroundColor: '#242424' }}>
+            <div className="flex items-center justify-between border-b px-2 py-0.5 md:px-4 md:py-1 sticky top-0 z-20" style={{ backgroundColor: '#242424', borderColor: '#919191' }}>
                 <div className="flex items-center space-x-2">
                     <div className="relative">
                         <button
                             onClick={() => setShowFileDropdown(prev => !prev)}
-                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-black text-white hover:bg-gray-800 transition-colors"
+                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium text-white transition-colors"
+                            style={{ backgroundColor: '#242424', borderWidth: '1px', borderColor: '#919191' }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3a3a3a'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#242424'}
                         >
                             <File size={12} />
                             <span>{currentFilename ? getDisplayName(currentFilename) : 'Select File'}</span>
                             <ChevronDown size={12} />
                         </button>
                         {showFileDropdown && (
-                            <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-gray-700 rounded shadow-lg z-50 min-w-[200px]">
+                            <div className="absolute top-full left-0 mt-1 rounded shadow-lg z-50 min-w-[200px]" style={{ backgroundColor: '#2a2a2a', borderWidth: '1px', borderColor: '#919191' }}>
                                 {availableFiles.length > 0 ? (
                                     availableFiles.map((filename) => (
                                         <button
                                             key={filename}
                                             onClick={() => handleFileSelect(filename)}
-                                            className="w-full text-left px-3 py-2 text-xs text-gray-200 hover:bg-gray-800 transition-colors"
+                                            className="w-full text-left px-3 py-2 text-xs transition-colors"
+                                            style={{ color: '#e0e0e0' }}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3a3a3a'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                         >
                                             {getDisplayName(filename)}
                                         </button>
                                     ))
                                 ) : (
-                                    <div className="px-3 py-2 text-xs text-gray-500">
+                                    <div className="px-3 py-2 text-xs text-center" style={{ color: '#919191' }}>
                                         No files available
                                     </div>
                                 )}
@@ -234,7 +240,10 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                        style={{ backgroundColor: '#2a2a2a', color: '#e0e0e0', borderWidth: '1px', borderColor: '#919191' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#3a3a3a'; e.currentTarget.style.color = '#ffffff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#2a2a2a'; e.currentTarget.style.color = '#e0e0e0'; }}
                     >
                         <Info size={12} />
                         <span>Info</span>
@@ -242,10 +251,25 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowAllInsights(prev => !prev)}
-                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
-                                ? 'bg-[#292929] text-black hover:bg-gray-200'
-                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
-                            }`}
+                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                        style={{
+                            backgroundColor: showAllInsights ? '#919191' : '#2a2a2a',
+                            color: showAllInsights ? '#242424' : '#e0e0e0',
+                            borderWidth: '1px',
+                            borderColor: '#919191'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!showAllInsights) {
+                                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                e.currentTarget.style.color = '#ffffff';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!showAllInsights) {
+                                e.currentTarget.style.backgroundColor = '#2a2a2a';
+                                e.currentTarget.style.color = '#e0e0e0';
+                            }
+                        }}
                     >
                         <span>All Insights</span>
                     </button>
@@ -253,25 +277,47 @@ const Dashboard: React.FC = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowPropagationDropdown(prev => !prev)}
-                            className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectedPropagationLevel !== null
-                                    ? 'bg-white text-black hover:bg-gray-200'
-                                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
-                                }`}
+                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                            style={{
+                                backgroundColor: selectedPropagationLevel !== null ? '#919191' : '#2a2a2a',
+                                color: selectedPropagationLevel !== null ? '#242424' : '#e0e0e0',
+                                borderWidth: '1px',
+                                borderColor: '#919191'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (selectedPropagationLevel === null) {
+                                    e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                    e.currentTarget.style.color = '#ffffff';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (selectedPropagationLevel === null) {
+                                    e.currentTarget.style.backgroundColor = '#2a2a2a';
+                                    e.currentTarget.style.color = '#e0e0e0';
+                                }
+                            }}
                         >
                             <span>{selectedPropagationLevel !== null ? `Level ${selectedPropagationLevel}+` : 'All Levels'}</span>
                             <ChevronDown size={12} />
                         </button>
                         {showPropagationDropdown && (
-                            <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-gray-700 rounded shadow-lg z-50 min-w-[120px]">
+                            <div className="absolute top-full left-0 mt-1 rounded shadow-lg z-50 min-w-[120px]" style={{ backgroundColor: '#2a2a2a', borderWidth: '1px', borderColor: '#919191' }}>
                                 <button
                                     onClick={() => {
                                         setSelectedPropagationLevel(null);
                                         setShowPropagationDropdown(false);
                                     }}
-                                    className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === null
-                                            ? 'bg-white text-black'
-                                            : 'text-gray-200 hover:bg-gray-800'
-                                        }`}
+                                    className="w-full text-left px-3 py-2 text-xs transition-colors"
+                                    style={{
+                                        backgroundColor: selectedPropagationLevel === null ? '#919191' : 'transparent',
+                                        color: selectedPropagationLevel === null ? '#242424' : '#e0e0e0'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (selectedPropagationLevel !== null) e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (selectedPropagationLevel !== null) e.currentTarget.style.backgroundColor = 'transparent';
+                                    }}
                                 >
                                     All Levels
                                 </button>
@@ -282,10 +328,17 @@ const Dashboard: React.FC = () => {
                                             setSelectedPropagationLevel(level);
                                             setShowPropagationDropdown(false);
                                         }}
-                                        className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === level
-                                                ? 'bg-white text-black'
-                                                : 'text-gray-200 hover:bg-gray-800'
-                                            }`}
+                                        className="w-full text-left px-3 py-2 text-xs transition-colors"
+                                        style={{
+                                            backgroundColor: selectedPropagationLevel === level ? '#919191' : 'transparent',
+                                            color: selectedPropagationLevel === level ? '#242424' : '#e0e0e0'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (selectedPropagationLevel !== level) e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (selectedPropagationLevel !== level) e.currentTarget.style.backgroundColor = 'transparent';
+                                        }}
                                     >
                                         Level {level}+
                                     </button>
@@ -298,32 +351,35 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center space-x-4">
                     {currentMetadata && (
                         <div className="flex items-center space-x-2 text-xs">
-                            <span className="text-gray-600">{currentMetadata.rowCount.toLocaleString()} rows</span>
+                            <span style={{ color: '#919191' }}>{currentMetadata.rowCount.toLocaleString()} rows</span>
                         </div>
                     )}
                 </div>
             </div>
 
             {showInfoModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-900 border border-gray-700 rounded-lg max-w-5xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-                            <h2 className="text-gray-100 text-lg font-semibold">CSV Visualization Tool</h2>
+                <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
+                    <div className="rounded-lg max-w-5xl w-full max-h-[80vh] overflow-y-auto" style={{ backgroundColor: '#2a2a2a', borderWidth: '1px', borderColor: '#919191' }}>
+                        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#919191' }}>
+                            <h2 className="text-lg font-semibold" style={{ color: '#e0e0e0' }}>CSV Visualization Tool</h2>
                             <button
                                 onClick={() => setShowInfoModal(false)}
-                                className="text-gray-400 hover:text-gray-100 transition-colors"
+                                className="transition-colors"
+                                style={{ color: '#919191' }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#e0e0e0'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#919191'}
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4 text-gray-300 leading-relaxed">
-                            <p className="text-gray-100 font-medium">
+                        <div className="p-6 space-y-4 leading-relaxed" style={{ color: '#c0c0c0' }}>
+                            <p className="font-medium" style={{ color: '#e0e0e0' }}>
                                 This tool visualises historical data from CSV files with forecasts from sumtyme.ai's Causal Intelligence Layer.
                             </p>
 
-                            <div className="pt-4 border-t border-gray-700">
-                                <h3 className="text-gray-100 font-medium mb-2">How to Use</h3>
+                            <div className="pt-4 border-t" style={{ borderColor: '#919191' }}>
+                                <h3 className="font-medium mb-2" style={{ color: '#e0e0e0' }}>How to Use</h3>
                                 <ol className="list-decimal list-inside space-y-1 text-sm">
                                     <li>Select a file from the dropdown to load data</li>
                                     <li>Use date range and timeframe filters to focus on specific periods</li>
@@ -332,8 +388,8 @@ const Dashboard: React.FC = () => {
                                 </ol>
                             </div>
 
-                            <div className="pt-4 border-t border-gray-700">
-                                <h3 className="text-gray-100 font-medium mb-2">Visualisation</h3>
+                            <div className="pt-4 border-t" style={{ borderColor: '#919191' }}>
+                                <h3 className="font-medium mb-2" style={{ color: '#e0e0e0' }}>Visualisation</h3>
                                 <p className="text-sm">
                                     The chart displays the open price as a line. Green dots represent positive causal chain insights,
                                     whilst red dots represent negative causal chain insights. Forecasts are plotted at the open price of
@@ -347,8 +403,8 @@ const Dashboard: React.FC = () => {
 
             <div className="pb-8">
                 {currentFileId ? (
-                    <div className="bg-black">
-                        <div className="bg-black" style={{ height: '100vh' }}>
+                    <div style={{ backgroundColor: '#242424' }}>
+                        <div style={{ height: '100vh', backgroundColor: '#242424' }}>
                             <ChartContainer
                                 timeframe={getHighestFrequencyTimeframe()}
                                 height={window.innerHeight}
@@ -366,29 +422,31 @@ const Dashboard: React.FC = () => {
                                 selectedPropagationLevel={selectedPropagationLevel}
                             />
                         </div>
-                        <div className="bg-black border-t border-gray-800 p-4">
+                        <div className="border-t p-4" style={{ backgroundColor: '#242424', borderColor: '#919191' }}>
                             <div className="mb-4 flex flex-wrap gap-4">
                                 <div className="flex items-center space-x-2">
-                                    <Calendar size={14} className="text-gray-400" />
-                                    <label className="text-gray-100 text-xs font-medium">Datetime Range:</label>
+                                    <Calendar size={14} style={{ color: '#919191' }} />
+                                    <label className="text-xs font-medium" style={{ color: '#e0e0e0' }}>Datetime Range:</label>
                                     <input
                                         type="text"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-gray-800 text-gray-100 border border-gray-600 rounded focus:outline-none focus:border-white font-mono"
+                                        className="px-2 py-1 text-xs border rounded focus:outline-none font-mono"
+                                        style={{ backgroundColor: '#2a2a2a', color: '#e0e0e0', borderColor: '#919191' }}
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
-                                    <span className="text-gray-400">to</span>
+                                    <span style={{ color: '#919191' }}>to</span>
                                     <input
                                         type="text"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-gray-800 text-gray-100 border border-gray-600 rounded focus:outline-none focus:border-white font-mono"
+                                        className="px-2 py-1 text-xs border rounded focus:outline-none font-mono"
+                                        style={{ backgroundColor: '#2a2a2a', color: '#e0e0e0', borderColor: '#919191' }}
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <label className="text-gray-100 text-xs font-medium">Timeframes:</label>
+                                    <label className="text-xs font-medium" style={{ color: '#e0e0e0' }}>Timeframes:</label>
                                     <MultiSelect
                                         options={availableTimeframes}
                                         value={selectedTimeframes}
@@ -399,36 +457,36 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <div className="mb-6">
-                                <h3 className="text-gray-100 font-medium mb-3 text-sm">Initial Indicators</h3>
+                                <h3 className="font-medium mb-3 text-sm" style={{ color: '#e0e0e0' }}>Initial Indicators</h3>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
-                                            <tr className="bg-gray-800">
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Datetime</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Value</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Timeframe</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">End Datetime</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Open Price</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Directional Change %</th>
+                                            <tr style={{ backgroundColor: '#2a2a2a' }}>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Datetime</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Value</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Timeframe</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>End Datetime</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Open Price</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Directional Change %</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-800">
-                                                    <td className="border border-gray-600 px-2 py-1 font-mono text-gray-100">{ind.datetime}</td>
-                                                    <td className="border border-gray-600 px-2 py-1">
+                                                <tr key={idx} style={{ cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                                    <td className="border px-2 py-1 font-mono" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{ind.datetime}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191' }}>
                                                         <span className={ind.trend_type > 0 ? 'text-green-400' : 'text-red-400'}>
                                                             {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{ind.timeframe}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 font-mono text-gray-100">{ind.end_datetime || 'N/A'}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{ind.open_price.toFixed(2)}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{ind.directional_change_percent.toFixed(2)}%</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{ind.timeframe}</td>
+                                                    <td className="border px-2 py-1 font-mono" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{ind.end_datetime || 'N/A'}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{ind.open_price.toFixed(2)}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{ind.directional_change_percent.toFixed(2)}%</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={6} className="border border-gray-600 px-2 py-3 text-center text-gray-400">
+                                                    <td colSpan={6} className="border px-2 py-3 text-center" style={{ borderColor: '#919191', color: '#919191' }}>
                                                         No initial indicators found
                                                     </td>
                                                 </tr>
@@ -439,36 +497,36 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <div>
-                                <h3 className="text-gray-100 font-medium mb-3 text-sm">Propagations</h3>
+                                <h3 className="font-medium mb-3 text-sm" style={{ color: '#e0e0e0' }}>Propagations</h3>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
-                                            <tr className="bg-gray-800">
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Prop ID</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Level</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Datetime</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Value</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Higher Freq</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Lower Freq</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Open Price</th>
-                                                <th className="border border-gray-600 px-2 py-1 text-left text-gray-100 font-medium">Directional Change %</th>
+                                            <tr style={{ backgroundColor: '#2a2a2a' }}>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Prop ID</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Level</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Datetime</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Value</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Higher Freq</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Lower Freq</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Open Price</th>
+                                                <th className="border px-2 py-1 text-left font-medium" style={{ borderColor: '#919191', color: '#e0e0e0' }}>Directional Change %</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {propagations.length > 0 ? propagations.map((prop, idx) => (
-                                                <tr key={idx} className="hover:bg-gray-800">
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{prop.propagation_id}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{prop.propagation_level}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 font-mono text-gray-100">{prop.datetime}</td>
-                                                    <td className="border border-gray-600 px-2 py-1">
+                                                <tr key={idx} style={{ cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{prop.propagation_id}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{prop.propagation_level}</td>
+                                                    <td className="border px-2 py-1 font-mono" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{prop.datetime}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191' }}>
                                                         <span className={prop.trend_type > 0 ? 'text-green-400' : 'text-red-400'}>
                                                             {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{prop.higher_freq}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{prop.lower_freq}</td>
-                                                    <td className="border border-gray-600 px-2 py-1 text-gray-100">{prop.open_price.toFixed(2)}</td>
-                                                    <td className="border border-gray-600 px-2 py-1">
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{prop.higher_freq}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{prop.lower_freq}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191', color: '#e0e0e0' }}>{prop.open_price.toFixed(2)}</td>
+                                                    <td className="border px-2 py-1" style={{ borderColor: '#919191' }}>
                                                         <span className={prop.directional_change_percent >= 0 ? 'text-green-400' : 'text-red-400'}>
                                                             {prop.directional_change_percent.toFixed(2)}%
                                                         </span>
@@ -476,7 +534,7 @@ const Dashboard: React.FC = () => {
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={8} className="border border-gray-600 px-2 py-3 text-center text-gray-400">
+                                                    <td colSpan={8} className="border px-2 py-3 text-center" style={{ borderColor: '#919191', color: '#919191' }}>
                                                         No propagations found
                                                     </td>
                                                 </tr>
@@ -490,9 +548,9 @@ const Dashboard: React.FC = () => {
                 ) : (
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center">
-                            <File className="mx-auto mb-4 text-gray-400" size={64} />
-                            <h2 className="text-gray-100 text-xl mb-2">No CSV File Loaded</h2>
-                            <p className="text-gray-600 mb-4">Select a file from the dropdown to begin</p>
+                            <File className="mx-auto mb-4" style={{ color: '#919191' }} size={64} />
+                            <h2 className="text-xl mb-2" style={{ color: '#e0e0e0' }}>No CSV File Loaded</h2>
+                            <p className="mb-4" style={{ color: '#919191' }}>Select a file from the dropdown to begin</p>
                         </div>
                     </div>
                 )}

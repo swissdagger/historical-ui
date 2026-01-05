@@ -108,7 +108,7 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         left: `${position.x + 1}px`,
         top: `${position.y - timeframeOffset}px`,
         transform: 'translate(-50%, -100%)',
-        color: '#919191',
+        color: color,
         fontSize: '12px',
         fontWeight: 'bold',
         zIndex: 2,

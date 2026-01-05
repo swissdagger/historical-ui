@@ -735,13 +735,13 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                         color: '#e0e0e0',
                         width: 1,
                         style: 2,
-                        labelBackgroundColor: '#919191',
+                        labelBackgroundColor: '#242424',
                     },
                     horzLine: {
                         color: '#e0e0e0',
                         width: 1,
                         style: 2,
-                        labelBackgroundColor: '#919191',
+                        labelBackgroundColor: '#242424',
                     },
                 },
                 handleScroll: {

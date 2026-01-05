@@ -710,7 +710,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     horzLines: { color: '#e5e7eb', style: 1 },
                 },
                 timeScale: {
-                    borderColor: '#e0e0e0',
+                    borderColor: '#e5e7eb',
                     timeVisible: true,
                     secondsVisible: !isMobile, // Hide seconds on mobile for cleaner look
                     borderVisible: true,
@@ -732,13 +732,13 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 crosshair: {
                     mode: 1,
                     vertLine: {
-                        color: '#9ca3af',
+                        color: '#e0e0e0',
                         width: 1,
                         style: 2,
                         labelBackgroundColor: '#ffffff',
                     },
                     horzLine: {
-                        color: '#000000',
+                        color: '#e0e0e0',
                         width: 1,
                         style: 2,
                         labelBackgroundColor: '#ffffff',

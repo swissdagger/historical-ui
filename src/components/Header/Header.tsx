@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <TrendingUp className="text-blue-500 mr-2\" size={24} />
+            <TrendingUp className="text-gray-300 mr-2\" size={24} />
             <h1 className="text-white text-xl font-bold">BTC Dashboard</h1>
           </div>
           

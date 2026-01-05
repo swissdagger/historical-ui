@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowFileDropdown(prev => !prev)}
-                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-black text-white hover:bg-gray-800 transition-colors"
                         >
                             <File size={12} />
                             <span>{currentFilename ? getDisplayName(currentFilename) : 'Select File'}</span>
@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
                     <button
                         onClick={() => setShowAllInsights(prev => !prev)}
                         className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
-                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                ? 'bg-black text-white hover:bg-gray-800'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
                             }`}
                     >
@@ -254,7 +254,7 @@ const Dashboard: React.FC = () => {
                         <button
                             onClick={() => setShowPropagationDropdown(prev => !prev)}
                             className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectedPropagationLevel !== null
-                                    ? 'bg-orange-600 text-white hover:bg-orange-700'
+                                    ? 'bg-black text-white hover:bg-gray-800'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
                                 }`}
                         >
@@ -269,7 +269,7 @@ const Dashboard: React.FC = () => {
                                         setShowPropagationDropdown(false);
                                     }}
                                     className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === null
-                                            ? 'bg-orange-600 text-white'
+                                            ? 'bg-black text-white'
                                             : 'text-gray-900 hover:bg-gray-100'
                                         }`}
                                 >
@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
                                             setShowPropagationDropdown(false);
                                         }}
                                         className={`w-full text-left px-3 py-2 text-xs transition-colors ${selectedPropagationLevel === level
-                                                ? 'bg-orange-600 text-white'
+                                                ? 'bg-black text-white'
                                                 : 'text-gray-900 hover:bg-gray-100'
                                             }`}
                                     >
@@ -375,7 +375,7 @@ const Dashboard: React.FC = () => {
                                         type="text"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-white text-gray-900 border border-gray-300 rounded focus:outline-none focus:border-blue-600 font-mono"
+                                        className="px-2 py-1 text-xs bg-white text-gray-900 border border-gray-300 rounded focus:outline-none focus:border-black font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                     <span className="text-gray-600">to</span>
@@ -383,7 +383,7 @@ const Dashboard: React.FC = () => {
                                         type="text"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-white text-gray-900 border border-gray-300 rounded focus:outline-none focus:border-blue-600 font-mono"
+                                        className="px-2 py-1 text-xs bg-white text-gray-900 border border-gray-300 rounded focus:outline-none focus:border-black font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
                                 </div>

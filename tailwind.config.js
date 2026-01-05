@@ -9,9 +9,9 @@ export default {
       },
       colors: {
         chart: {
-          bg: '#1a1a1a',
-          grid: '#2a2a2a',
-          text: '#999',
+          bg: '#242424',
+          grid: '#3a3a3a',
+          text: '#919191',
           up: '#26a69a',
           down: '#ef5350',
         },

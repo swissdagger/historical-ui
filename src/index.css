@@ -15,28 +15,28 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f5f5;
+  background: #242424;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d0d0d0;
+  background: #919191;
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #3a3a3a;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b0b0b0;
+  background: #a0a0a0;
 }
 
 ::-webkit-scrollbar-corner {
-  background: #f5f5f5;
+  background: #242424;
 }
 
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d0d0d0 #f5f5f5;
+  scrollbar-color: #919191 #242424;
 }
 
 /* Hide chart logos and watermarks */

@@ -993,7 +993,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             </div>
             <div className="relative h-[calc(100%-20px)] md:h-[calc(100%-24px)]">
                 {/* Chart container - managed by lightweight-charts */}
-                <div ref={chartContainerRef} className="absolute inset-0 p-0.5" />
+                <div ref={chartContainerRef} className="absolute inset-0" />
 
                 {/* Overlay container - managed by React for PredictionArrows */}
                 <div ref={overlayContainerRef} className="absolute inset-0 p-0.5 pointer-events-none">

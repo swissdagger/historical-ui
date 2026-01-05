@@ -706,8 +706,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     fontFamily: 'Inter, sans-serif',
                 },
                 grid: {
-                    vertLines: { color: '#e5e7eb', style: 1 },
-                    horzLines: { color: '#e5e7eb', style: 1 },
+                    vertLines: { color: '#919191', style: 1 },
+                    horzLines: { color: '#919191', style: 1 },
                 },
                 timeScale: {
                     borderColor: '#e0e0e0',

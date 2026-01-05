@@ -700,7 +700,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 width: containerWidth,
                 height: containerHeight,
                 layout: {
-                    background: { type: 'solid', color: '#ffffff' },
+                    background: { type: 'solid', color: '#292929' },
                     textColor: '#666',
                     fontSize: fontSize,
                     fontFamily: 'Inter, sans-serif',

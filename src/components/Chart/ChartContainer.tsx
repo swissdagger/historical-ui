@@ -1029,7 +1029,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                             fontFamily: 'monospace',
                                             backgroundColor: 'rgba(255, 255, 255, 0.9)',
                                             padding: '2px 4px',
-                                            borderRadius: '2px',
+                                            borderRadius: '1px',
                                             border: '1px solid #919191',
                                             whiteSpace: 'nowrap'
                                         }}

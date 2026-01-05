@@ -996,7 +996,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 <div ref={chartContainerRef} className="absolute inset-0" />
 
                 {/* Overlay container - managed by React for PredictionArrows */}
-                <div ref={overlayContainerRef} className="absolute inset-0 p-0.5 pointer-events-none">
+                <div ref={overlayContainerRef} className="absolute inset-0 pointer-events-none">
                     {(() => {
                         // Group arrow positions by datetime to identify overlapping timeframes
                         const positionsByDatetime = new Map<string, ArrowPosition[]>();

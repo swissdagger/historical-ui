@@ -963,7 +963,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                 onChange={handleTimeframeInputChange}
                                 onBlur={handleTimeframeInputSubmit}
                                 onKeyDown={handleTimeframeInputKeyDown}
-                                className="bg-white text-gray-900 text-[8px] md:text-[10px] px-1 py-0.5 rounded border border-gray-300 focus:border-blue-500 focus:outline-none w-16 md:w-20"
+                                className="bg-white text-[#e0e0e0] text-[8px] md:text-[10px] px-1 py-0.5 rounded border border-gray-300 focus:border-blue-500 focus:outline-none w-16 md:w-20"
                                 autoFocus
                             />
                             {timeframeInputError && (

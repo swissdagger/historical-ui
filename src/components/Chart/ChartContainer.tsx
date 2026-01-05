@@ -710,7 +710,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     horzLines: { color: '#e5e7eb', style: 1 },
                 },
                 timeScale: {
-                    borderColor: '#e5e7eb',
+                    borderColor: '#e0e0e0',
                     timeVisible: true,
                     secondsVisible: !isMobile, // Hide seconds on mobile for cleaner look
                     borderVisible: true,

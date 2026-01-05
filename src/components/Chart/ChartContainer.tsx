@@ -1030,7 +1030,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                             backgroundColor: 'rgba(255, 255, 255, 0.9)',
                                             padding: '2px 4px',
                                             borderRadius: '2px',
-                                            border: '1px solid #d1d5db',
+                                            border: '1px solid #919191',
                                             whiteSpace: 'nowrap'
                                         }}
                                         title={`Change ending period: ${position.datetime} to ${position.endTime}`}

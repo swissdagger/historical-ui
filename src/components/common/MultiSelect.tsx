@@ -103,14 +103,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             <button
               type="button"
               onClick={handleSelectAll}
-              className="flex-1 px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] rounded hover:bg-blue-600 hover:text-white transition-colors"
+              className="flex-1 px-2 py-1 text-xs bg-[#3a3a3a] text-white rounded hover:bg-blue-600 hover:text-white transition-colors"
             >
               Select All
             </button>
             <button
               type="button"
               onClick={handleDeselectAll}
-              className="flex-1 px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] rounded hover:bg-red-600 hover:text-white transition-colors"
+              className="flex-1 px-2 py-1 text-xs bg-[#3a3a3a] text-white rounded hover:bg-red-600 hover:text-white transition-colors"
             >
               Deselect All
             </button>

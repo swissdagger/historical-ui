@@ -127,24 +127,27 @@ const Dashboard: React.FC = () => {
         });
     };
 
-    const handleTimeframeUpdate = (updatedTimeframe: TimeframeConfig) => {
+    const handleTimeframeUpdate = useCallback((updatedTimeframe: TimeframeConfig) => {
         setUserSelectedTimeframes(prevTimeframes =>
             prevTimeframes.map(tf =>
                 tf.id === updatedTimeframe.id ? updatedTimeframe : tf
             )
         );
-    };
+    }, []);
 
-    const handleFileSelect = async (filename: string) => {
+    const handleFileSelect = useCallback(async (filename: string) => {
         const fileId = filename.replace(/\.csv$/i, '');
         const result = await loadLocalCSVFile(filename);
         if (result.success && result.fileId) {
             setCurrentFileId(result.fileId);
             setCurrentFilename(filename);
             loadPredictionsForTicker(result.fileId);
-            if (!loadedFileIds.includes(result.fileId)) {
-                setLoadedFileIds(prev => [...prev, result.fileId]);
-            }
+            setLoadedFileIds(prev => {
+                if (!prev.includes(result.fileId!)) {
+                    return [...prev, result.fileId!];
+                }
+                return prev;
+            });
 
             const metadata = getCSVMetadata(result.fileId);
             if (metadata) {
@@ -155,7 +158,7 @@ const Dashboard: React.FC = () => {
             }
         }
         setShowFileDropdown(false);
-    };
+    }, []);
 
     const currentMetadata = currentFileId ? getCSVMetadata(currentFileId) : null;
 
@@ -413,20 +416,31 @@ const Dashboard: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
-                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.datetime}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1">
-                                                        <span className={ind.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
-                                                            {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
-                                                        </span>
-                                                    </td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.timeframe}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.end_datetime || 'N/A'}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.open_price.toFixed(2)}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.directional_change_percent.toFixed(2)}%</td>
-                                                </tr>
-                                            )) : (
+                                            {initialIndicators.length > 0 ? (
+                                                <>
+                                                    {initialIndicators.slice(0, 100).map((ind, idx) => (
+                                                        <tr key={idx} className="hover:bg-[#2a2a2a]">
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.datetime}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1">
+                                                                <span className={ind.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
+                                                                    {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
+                                                                </span>
+                                                            </td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.timeframe}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.end_datetime || 'N/A'}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.open_price.toFixed(2)}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.directional_change_percent.toFixed(2)}%</td>
+                                                        </tr>
+                                                    ))}
+                                                    {initialIndicators.length > 100 && (
+                                                        <tr>
+                                                            <td colSpan={6} className="border border-[#4a4a4a] px-2 py-2 text-center text-[#909090] italic">
+                                                                Showing 100 of {initialIndicators.length} indicators (use filters to reduce data)
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </>
+                                            ) : (
                                                 <tr>
                                                     <td colSpan={6} className="border border-[#4a4a4a] px-2 py-3 text-center text-[#707070]">
                                                         No initial indicators found
@@ -455,26 +469,37 @@ const Dashboard: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {propagations.length > 0 ? propagations.map((prop, idx) => (
-                                                <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_id}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_level}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{prop.datetime}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1">
-                                                        <span className={prop.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
-                                                            {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
-                                                        </span>
-                                                    </td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.higher_freq}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.lower_freq}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.open_price.toFixed(2)}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1">
-                                                        <span className={prop.directional_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                                            {prop.directional_change_percent.toFixed(2)}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            )) : (
+                                            {propagations.length > 0 ? (
+                                                <>
+                                                    {propagations.slice(0, 100).map((prop, idx) => (
+                                                        <tr key={idx} className="hover:bg-[#2a2a2a]">
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_id}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_level}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{prop.datetime}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1">
+                                                                <span className={prop.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
+                                                                    {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
+                                                                </span>
+                                                            </td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.higher_freq}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.lower_freq}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.open_price.toFixed(2)}</td>
+                                                            <td className="border border-[#4a4a4a] px-2 py-1">
+                                                                <span className={prop.directional_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                                    {prop.directional_change_percent.toFixed(2)}%
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                    {propagations.length > 100 && (
+                                                        <tr>
+                                                            <td colSpan={8} className="border border-[#4a4a4a] px-2 py-2 text-center text-[#909090] italic">
+                                                                Showing 100 of {propagations.length} propagations (use filters to reduce data)
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </>
+                                            ) : (
                                                 <tr>
                                                     <td colSpan={8} className="border border-[#4a4a4a] px-2 py-3 text-center text-[#707070]">
                                                         No propagations found

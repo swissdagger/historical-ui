@@ -1,49 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { PredictionArrowProps } from '../../types';
 import { getInitialTimeframes } from '../../api/binanceAPI';
 
-// Helper function to get human-readable timeframe label
+const timeframeLabelCache = new Map<string, string>();
+const timeframeSecondsCache = new Map<string, number>();
+
 const getTimeframeLabel = (timeframeId: string): string => {
+    if (timeframeLabelCache.has(timeframeId)) {
+        return timeframeLabelCache.get(timeframeId)!;
+    }
+
     const timeframes = getInitialTimeframes('BTCUSDT', false);
     const timeframe = timeframes.find(tf => tf.id === timeframeId);
-    return timeframe?.label || timeframeId;
+    const label = timeframe?.label || timeframeId;
+
+    timeframeLabelCache.set(timeframeId, label);
+    return label;
 };
 
-// Convert timeframe ID to seconds
 const timeframeToSeconds = (timeframeId: string): number => {
+    if (timeframeSecondsCache.has(timeframeId)) {
+        return timeframeSecondsCache.get(timeframeId)!;
+    }
+
     const match = timeframeId.match(/^(\d+)([smhdw])$/);
-    if (!match) return 0;
+    if (!match) {
+        timeframeSecondsCache.set(timeframeId, 0);
+        return 0;
+    }
 
     const value = parseInt(match[1], 10);
     const unit = match[2];
 
+    let seconds = 0;
     switch (unit) {
-        case 's': return value;
-        case 'm': return value * 60;
-        case 'h': return value * 3600;
-        case 'd': return value * 86400;
-        case 'w': return value * 604800;
-        default: return 0;
+        case 's': seconds = value; break;
+        case 'm': seconds = value * 60; break;
+        case 'h': seconds = value * 3600; break;
+        case 'd': seconds = value * 86400; break;
+        case 'w': seconds = value * 604800; break;
+        default: seconds = 0;
     }
+
+    timeframeSecondsCache.set(timeframeId, seconds);
+    return seconds;
 };
 
 const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker, timeframesAtSameTime }) => {
     const [showTooltip, setShowTooltip] = useState(false);
 
-    // Don't render anything if value is 0 (no prediction)
-    if (value === 0 || value === null || value === undefined) {
+    const handleMouseEnter = useCallback(() => setShowTooltip(true), []);
+    const handleMouseLeave = useCallback(() => setShowTooltip(false), []);
+
+    const computedValues = useMemo(() => {
+        if (value === 0 || value === null || value === undefined) {
+            return null;
+        }
+
+        const isUp = value > 0;
+        const color = isUp ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)';
+        const timeframeLabel = getTimeframeLabel(timeframeId);
+        const absValue = Math.abs(value);
+        const dotSize = Math.max(4, Math.min(8, 4 + (absValue / 10)));
+
+        return { isUp, color, timeframeLabel, absValue, dotSize };
+    }, [value, timeframeId]);
+
+    if (!computedValues) {
         return null;
     }
 
-    // Determine if prediction is bullish (positive value) or bearish (negative value)
-    const isUp = value > 0;
-    const color = isUp ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)';
-    const timeframeLabel = getTimeframeLabel(timeframeId);
-
-    // Calculate dot size based on confidence (absolute value)
-    const absValue = Math.abs(value);
-    // Ensure minimum size of 4px for visibility, especially for value of 1 or -1
-    const dotSize = Math.max(4, Math.min(8, 4 + (absValue / 10))); // Size between 4-8px based on confidence
+    const { isUp, color, timeframeLabel, absValue, dotSize } = computedValues;
 
     const dotStyle: React.CSSProperties = {
         position: 'absolute',
@@ -76,32 +103,23 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         border: `1px solid ${color}`,
     };
 
-    // Calculate vertical offset based on timeframe frequency ranking (only if multiple at same time)
-    const getTimeframeOffset = (timeframeId: string, timeframesAtSameTime: string[]): number => {
-        // Base offset for all labels
+    const timeframeOffset = useMemo(() => {
         const baseOffset = 12;
 
-        // If no other timeframes at the same time, or only one timeframe, use base offset
         if (!timeframesAtSameTime || timeframesAtSameTime.length <= 1) {
             return baseOffset;
         }
 
-        // Convert all timeframes to seconds and sort by frequency (lowest seconds = highest frequency)
         const sortedTimeframes = [...timeframesAtSameTime]
             .map(tf => ({ id: tf, seconds: timeframeToSeconds(tf) }))
             .sort((a, b) => a.seconds - b.seconds);
 
-        // Find the rank of current timeframe (0 = highest frequency)
         const rank = sortedTimeframes.findIndex(tf => tf.id === timeframeId);
 
-        // If not found, use default offset
         if (rank === -1) return baseOffset;
 
-        // Add 10px for each rank (0px for highest frequency, 10px for next, 20px for next, etc.)
         return baseOffset + (rank * 10);
-    };
-
-    const timeframeOffset = getTimeframeOffset(timeframeId, timeframesAtSameTime || []);
+    }, [timeframeId, timeframesAtSameTime]);
 
     const labelStyle: React.CSSProperties = {
         position: 'absolute',
@@ -120,8 +138,8 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
         <>
             <div
                 style={dotStyle}
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
             />
             <div style={labelStyle}>
                 {timeframeId}
@@ -135,4 +153,4 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
     );
 };
 
-export default PredictionArrow;
+export default React.memo(PredictionArrow);

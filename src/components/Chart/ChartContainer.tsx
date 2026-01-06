@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { createChart, IChartApi, ISeriesApi } from 'lightweight-charts';
 import { CandlestickData, ChartContainerProps, PredictionEntry, ArrowPosition, Propagation, InitialIndicator } from '../../types';
 import { fetchKlineData, subscribeToUpdates, getCurrentData, parseAndValidateTimeframeInput, calculateDataLimit } from '../../api/binanceAPI';
@@ -184,7 +184,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     const [arrowPositions, setArrowPositions] = useState<ArrowPosition[]>([]);
     const [isMobile, setIsMobile] = useState(false);
 
-    const filterPredictionsByDateAndTimeframe = (preds: PredictionEntry[]): PredictionEntry[] => {
+    const filterPredictionsByDateAndTimeframe = useCallback((preds: PredictionEntry[]): PredictionEntry[] => {
         let filtered = preds;
 
         if (selectedTimeframes && selectedTimeframes.length === 0) {
@@ -202,7 +202,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         if (selectedTimeframes && selectedTimeframes.length > 0) {
-            filtered = filtered.filter(pred => selectedTimeframes.includes(pred.timeframeId));
+            const timeframeSet = new Set(selectedTimeframes);
+            filtered = filtered.filter(pred => timeframeSet.has(pred.timeframeId));
         }
 
         if (selectedPropagationLevel !== null && propagations.length > 0) {
@@ -219,8 +220,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 .filter(([_, maxLevel]) => maxLevel >= selectedPropagationLevel)
                 .map(([id, _]) => id);
 
+            const filteredPropagationSet = new Set(filteredPropagationIds);
             const validPropagations = propagations.filter(prop =>
-                filteredPropagationIds.includes(prop.propagation_id)
+                filteredPropagationSet.has(prop.propagation_id)
             );
 
             const validPredictionKeys = new Set<string>();
@@ -247,9 +249,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return filtered;
-    };
+    }, [selectedTimeframes, startDate, endDate, selectedPropagationLevel, propagations, initialIndicators]);
 
-    const filterKlinesByDateRange = (klines: CandlestickData[]): CandlestickData[] => {
+    const filterKlinesByDateRange = useCallback((klines: CandlestickData[]): CandlestickData[] => {
         if (!startDate && !endDate) {
             return klines;
         }
@@ -267,9 +269,12 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             lastKlineTime: klines.length > 0 ? new Date(klines[klines.length - 1].time * 1000).toISOString() : 'none'
         });
 
+        const startTime = start.getTime();
+        const endTime = end.getTime();
+
         const filtered = klines.filter(kline => {
-            const klineDate = new Date(kline.time * 1000);
-            return klineDate >= start && klineDate <= end;
+            const klineTime = kline.time * 1000;
+            return klineTime >= startTime && klineTime <= endTime;
         });
 
         console.log('[ChartContainer] Filtered result:', {
@@ -278,7 +283,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         });
 
         return filtered;
-    };
+    }, [startDate, endDate]);
 
     // Timeframe input state
     const [timeframeInputValue, setTimeframeInputValue] = useState('');
@@ -510,7 +515,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         return filteredPredictions;
     };
 
-    const calculateArrowPositions = (): ArrowPosition[] => {
+    const calculateArrowPositions = useCallback((): ArrowPosition[] => {
         if (!chartRef.current || !seriesRef.current || !chartContainerRef.current || currentData.length === 0) {
             console.log('[ChartContainer] calculateArrowPositions early return:', {
                 hasChart: !!chartRef.current,
@@ -672,13 +677,16 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return arrowPositions;
-    };
+    }, [predictions, currentData, showAllInsights, symbol, filterPredictionsByDateAndTimeframe]);
 
-    // Update arrow positions whenever dependencies change
     useEffect(() => {
-        const newArrowPositions = calculateArrowPositions();
-        setArrowPositions(newArrowPositions);
-    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, initialIndicators, selectedPropagationLevel]);
+        const timeoutId = setTimeout(() => {
+            const newArrowPositions = calculateArrowPositions();
+            setArrowPositions(newArrowPositions);
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
+    }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, initialIndicators, selectedPropagationLevel, calculateArrowPositions]);
 
     useEffect(() => {
         let resizeObserver: ResizeObserver | null = null;

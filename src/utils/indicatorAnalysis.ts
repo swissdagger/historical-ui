@@ -38,8 +38,13 @@ function timeframeToSeconds(timeframe: string): number {
     }
 }
 
-function getOpenPriceAtDatetime(csvData: CandlestickData[], datetime: string): number {
+function getOpenPriceAtDatetime(csvData: CandlestickData[], datetime: string, priceMap?: Map<number, number>): number {
     const targetTime = new Date(datetime.replace(' ', 'T') + 'Z').getTime() / 1000;
+
+    if (priceMap) {
+        return priceMap.get(targetTime) || 0;
+    }
+
     const candle = csvData.find(c => c.time === targetTime);
     return candle?.open || 0;
 }
@@ -51,8 +56,9 @@ export function extractTrendIndicators(
 ): { initialIndicators: InitialIndicator[], propagations: Propagation[] } {
     const allTimeframes = Object.keys(allPredictions);
 
+    const selectedTimeframesSet = new Set(selectedTimeframes);
     const timeframesToUse = selectedTimeframes.length > 0
-        ? allTimeframes.filter(tf => selectedTimeframes.includes(tf))
+        ? allTimeframes.filter(tf => selectedTimeframesSet.has(tf))
         : allTimeframes;
 
     const sortedTimeframes = timeframesToUse.sort((a, b) => timeframeToSeconds(a) - timeframeToSeconds(b));
@@ -61,22 +67,30 @@ export function extractTrendIndicators(
         return { initialIndicators: [], propagations: [] };
     }
 
+    const timeToPriceMap = new Map<number, number>();
+    csvData.forEach(candle => {
+        timeToPriceMap.set(candle.time, candle.open);
+    });
+
+    const timeframeIndexMap = new Map<string, number>();
+    sortedTimeframes.forEach((tf, index) => {
+        timeframeIndexMap.set(tf, index);
+    });
+
     const highestFreqTimeframe = sortedTimeframes[0];
     const highestFreqPredictions = allPredictions[highestFreqTimeframe] || [];
 
-    // Sort predictions by datetime
     const sortedPredictions = [...highestFreqPredictions].sort((a, b) =>
         new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
     );
 
-    // Step 1: Identify initial directional indicators
     const initialIndicators: InitialIndicator[] = [];
     let lastSignal: number | null = null;
 
     for (const pred of sortedPredictions) {
         if (pred.value !== 0) {
             if (lastSignal === null || pred.value !== lastSignal) {
-                const openPrice = getOpenPriceAtDatetime(csvData, pred.datetime);
+                const openPrice = getOpenPriceAtDatetime(csvData, pred.datetime, timeToPriceMap);
                 initialIndicators.push({
                     datetime: pred.datetime,
                     trend_type: pred.value,
@@ -115,7 +129,7 @@ export function extractTrendIndicators(
     for (const initialInd of initialIndicators) {
         const currentDatetime = new Date(initialInd.datetime);
         const currentType = initialInd.trend_type;
-        const currentTimeframeIndex = sortedTimeframes.indexOf(initialInd.timeframe);
+        const currentTimeframeIndex = timeframeIndexMap.get(initialInd.timeframe) ?? 0;
         const endDatetime = initialInd.end_datetime ? new Date(initialInd.end_datetime) : null;
         const initialOpenPrice = initialInd.open_price;
 
@@ -128,16 +142,17 @@ export function extractTrendIndicators(
         propagationCounter++;
         const currentPropagationId = `Prop_${propagationCounter}`;
 
-        // Continue the chain through lower timeframes
         for (let j = currentChainTimeframeIndex + 1; j < sortedTimeframes.length; j++) {
             const nextLowerTimeframe = sortedTimeframes[j];
             const nextLowerPredictions = allPredictions[nextLowerTimeframe] || [];
 
-            // Find the first occurrence of the same signal in the next lower timeframe
+            const currentChainTime = currentChainDatetime.getTime();
+            const endTime = endDatetime.getTime();
+
             const laterSignals = nextLowerPredictions.filter(pred => {
-                const predDatetime = new Date(pred.datetime);
-                return predDatetime >= currentChainDatetime &&
-                       predDatetime <= endDatetime &&
+                const predTime = new Date(pred.datetime).getTime();
+                return predTime >= currentChainTime &&
+                       predTime <= endTime &&
                        pred.value === currentType;
             }).sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
 
@@ -145,29 +160,28 @@ export function extractTrendIndicators(
                 const nextSignal = laterSignals[0];
                 const nextSignalDatetime = new Date(nextSignal.datetime);
 
-                // Check if the most recent prediction before currentChainDatetime (excluding 0) is the same as currentType
                 const previousPredictions = nextLowerPredictions
-                    .filter(pred => new Date(pred.datetime) < currentChainDatetime && pred.value !== 0)
+                    .filter(pred => new Date(pred.datetime).getTime() < currentChainTime && pred.value !== 0)
                     .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
 
                 if (previousPredictions.length > 0 && previousPredictions[0].value === currentType) {
                     break;
                 }
 
-                // Check for opposing signal in the highest frequency timeframe
                 const initialFreqPredictions = allPredictions[sortedTimeframes[currentTimeframeIndex]] || [];
                 const opposingSignalValue = -currentType;
+                const nextSignalTime = nextSignalDatetime.getTime();
 
                 const opposingSignalFound = initialFreqPredictions.some(pred => {
-                    const predDatetime = new Date(pred.datetime);
-                    return predDatetime > currentChainDatetime &&
-                           predDatetime <= nextSignalDatetime &&
+                    const predTime = new Date(pred.datetime).getTime();
+                    return predTime > currentChainTime &&
+                           predTime <= nextSignalTime &&
                            pred.value === opposingSignalValue;
                 });
 
                 if (!opposingSignalFound) {
                     propagationLevel++;
-                    const propOpenPrice = getOpenPriceAtDatetime(csvData, nextSignal.datetime);
+                    const propOpenPrice = getOpenPriceAtDatetime(csvData, nextSignal.datetime, timeToPriceMap);
                     const directionalChange = initialOpenPrice !== 0
                         ? ((propOpenPrice - initialOpenPrice) / initialOpenPrice) * 100
                         : 0;

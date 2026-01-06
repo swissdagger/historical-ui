@@ -388,7 +388,7 @@ const Dashboard: React.FC = () => {
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <label className="text-[#919191] text-xs font-medium">Timeframes:</label>
+                                    <label className="text-white text-xs font-medium">Timeframes:</label>
                                     <MultiSelect
                                         options={availableTimeframes}
                                         value={selectedTimeframes}

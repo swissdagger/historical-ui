@@ -973,7 +973,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     ) : (
                         <button
                             onClick={() => setIsEditingTimeframe(true)}
-                            className="text-[#919191] font-medium hover:text-white transition-colors text-[8px] md:text-[10px]"
+                            className="text-white font-medium hover:text-white transition-colors text-[8px] md:text-[10px]"
                         >
                             {timeframe.label}
                         </button>

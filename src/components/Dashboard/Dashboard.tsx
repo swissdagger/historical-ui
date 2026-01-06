@@ -378,7 +378,7 @@ const Dashboard: React.FC = () => {
                                         className="px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a] font-mono"
                                         placeholder="YYYY-MM-DD HH:MM:SS"
                                     />
-                                    <span className="text-white">to</span>
+                                    <span className="text-white text-xs">to</span>
                                     <input
                                         type="text"
                                         value={endDate}

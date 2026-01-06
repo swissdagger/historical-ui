@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowFileDropdown(prev => !prev)}
-                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-[#919191] hover:bg-[#4a4a4a] transition-colors"
+                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-white hover:bg-[#4a4a4a] transition-colors"
                         >
                             <File size={12} />
                             <span>{currentFilename ? getDisplayName(currentFilename) : 'Select File'}</span>

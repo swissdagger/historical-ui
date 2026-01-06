@@ -415,7 +415,7 @@ const Dashboard: React.FC = () => {
                                         <tbody>
                                             {initialIndicators.length > 0 ? initialIndicators.map((ind, idx) => (
                                                 <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-[#919191]">{ind.datetime}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.datetime}</td>
                                                     <td className="border border-[#4a4a4a] px-2 py-1">
                                                         <span className={ind.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
                                                             {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}

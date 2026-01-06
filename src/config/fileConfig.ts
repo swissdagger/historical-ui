@@ -7,6 +7,10 @@ export const fileConfigs: Record<string, FileConfig> = {
   'spy_etf_1s_combined_all_trends.csv': {
     filename: 'spy_etf_1s_combined_all_trends.csv',
     displayName: 'SPY ETF'
+  },
+  'appl_combined.csv': {
+    filename: 'appl_combined.csv',
+    displayName: 'APPL'
   }
 };
 

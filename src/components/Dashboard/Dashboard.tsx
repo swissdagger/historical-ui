@@ -255,7 +255,7 @@ const Dashboard: React.FC = () => {
                             onClick={() => setShowPropagationDropdown(prev => !prev)}
                             className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectedPropagationLevel !== null
                                     ? 'bg-orange-600 text-white hover:bg-orange-700'
-                                    : 'bg-[#3a3a3a] text-[#919191] hover:bg-[#4a4a4a]'
+                                    : 'bg-[#3a3a3a] text-white hover:bg-[#4a4a4a]'
                                 }`}
                         >
                             <span>{selectedPropagationLevel !== null ? `Level ${selectedPropagationLevel}+` : 'All Levels'}</span>

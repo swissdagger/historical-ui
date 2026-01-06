@@ -94,7 +94,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search timeframes..."
-              className="w-full px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a]"
+              className="w-full px-2 py-1 text-xs bg-[#3a3a3a] text-white border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a]"
               autoFocus
             />
           </div>

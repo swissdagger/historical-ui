@@ -4,6 +4,10 @@ export interface FileConfig {
 }
 
 export const fileConfigs: Record<string, FileConfig> = {
+   'spy_etf_1s_combined_all_trends.csv': {
+    filename: 'spy_etf_1s_combined_all_trends.csv',
+    displayName: 'SPY ETF'
+  }
   'appl_full_combined.csv': {
     filename: 'appl_full_combined.csv',
     displayName: 'APPL'

@@ -399,17 +399,17 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <div className="mb-6">
-                                <h3 className="text-[#919191] font-medium mb-3 text-sm">Initial Indicators</h3>
+                                <h3 className="text-white font-medium mb-3 text-sm">Initial Indicators</h3>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
                                             <tr className="bg-[#3a3a3a]">
-                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-[#919191] font-medium">Datetime</th>
-                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-[#919191] font-medium">Value</th>
-                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-[#919191] font-medium">Timeframe</th>
-                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-[#919191] font-medium">End Datetime</th>
-                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-[#919191] font-medium">Open Price</th>
-                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-[#919191] font-medium">Directional Change %</th>
+                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-white font-medium">Datetime</th>
+                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-white font-medium">Value</th>
+                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-white font-medium">Timeframe</th>
+                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-white font-medium">End Datetime</th>
+                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-white font-medium">Open Price</th>
+                                                <th className="border border-[#4a4a4a] px-2 py-1 text-left text-white font-medium">Directional Change %</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -421,10 +421,10 @@ const Dashboard: React.FC = () => {
                                                             {ind.trend_type > 0 ? '↑' : '↓'} {ind.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{ind.timeframe}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-[#919191]">{ind.end_datetime || 'N/A'}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{ind.open_price.toFixed(2)}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{ind.directional_change_percent.toFixed(2)}%</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.timeframe}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.end_datetime || 'N/A'}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.open_price.toFixed(2)}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.directional_change_percent.toFixed(2)}%</td>
                                                 </tr>
                                             )) : (
                                                 <tr>

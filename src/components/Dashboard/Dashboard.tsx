@@ -218,7 +218,7 @@ const Dashboard: React.FC = () => {
                                         <button
                                             key={filename}
                                             onClick={() => handleFileSelect(filename)}
-                                            className="w-full text-left px-3 py-2 text-xs text-[#919191] hover:bg-[#3a3a3a] transition-colors"
+                                            className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#3a3a3a] transition-colors"
                                         >
                                             {getDisplayName(filename)}
                                         </button>
@@ -234,7 +234,7 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-[#919191] hover:bg-[#4a4a4a] transition-colors"
+                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-white hover:bg-[#4a4a4a] transition-colors"
                     >
                         <Info size={12} />
                         <span>Info</span>

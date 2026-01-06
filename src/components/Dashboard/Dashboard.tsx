@@ -457,17 +457,17 @@ const Dashboard: React.FC = () => {
                                         <tbody>
                                             {propagations.length > 0 ? propagations.map((prop, idx) => (
                                                 <tr key={idx} className="hover:bg-[#2a2a2a]">
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{prop.propagation_id}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{prop.propagation_level}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-[#919191]">{prop.datetime}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_id}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_level}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{prop.datetime}</td>
                                                     <td className="border border-[#4a4a4a] px-2 py-1">
                                                         <span className={prop.trend_type > 0 ? 'text-green-600' : 'text-red-600'}>
                                                             {prop.trend_type > 0 ? '↑' : '↓'} {prop.trend_type}
                                                         </span>
                                                     </td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{prop.higher_freq}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{prop.lower_freq}</td>
-                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-[#919191]">{prop.open_price.toFixed(2)}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.higher_freq}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.lower_freq}</td>
+                                                    <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.open_price.toFixed(2)}</td>
                                                     <td className="border border-[#4a4a4a] px-2 py-1">
                                                         <span className={prop.directional_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}>
                                                             {prop.directional_change_percent.toFixed(2)}%

@@ -680,12 +680,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     }, [predictions, currentData, showAllInsights, symbol, filterPredictionsByDateAndTimeframe]);
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            const newArrowPositions = calculateArrowPositions();
-            setArrowPositions(newArrowPositions);
-        }, 100);
-
-        return () => clearTimeout(timeoutId);
+        const newArrowPositions = calculateArrowPositions();
+        setArrowPositions(newArrowPositions);
     }, [predictions, currentData, viewUpdateTrigger, chartDimensions, showAllInsights, propagations, initialIndicators, selectedPropagationLevel, calculateArrowPositions]);
 
     useEffect(() => {

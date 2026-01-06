@@ -78,7 +78,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-3 py-1.5 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded hover:bg-[#4a4a4a] focus:outline-none focus:border-[#5a5a5a] transition-colors min-w-[200px]"
+        className="flex items-center justify-between w-full px-3 py-1.5 text-xs bg-[#3a3a3a] text-white border border-[#4a4a4a] rounded hover:bg-[#4a4a4a] focus:outline-none focus:border-[#5a5a5a] transition-colors min-w-[200px]"
       >
         <span className="truncate">{getDisplayText()}</span>
         <ChevronDown

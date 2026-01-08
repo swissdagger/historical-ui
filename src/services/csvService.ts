@@ -117,9 +117,9 @@ export function getCSVPredictions(fileId: string, timeframe?: string): Predictio
     return filePredictions.get(timeframe) || [];
   }
 
-  const allPredictions: PredictionEntry[] = [];
+  let allPredictions: PredictionEntry[] = [];
   filePredictions.forEach(predictions => {
-    allPredictions.push(...predictions);
+    allPredictions = allPredictions.concat(predictions);
   });
   return allPredictions;
 }

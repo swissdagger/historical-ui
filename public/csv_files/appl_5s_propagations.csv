@@ -1,3 +1,4 @@
+datetime,open,high,low,close,chain_detected_5s,chain_detected_10s,chain_detected_30s,chain_detected_1m,chain_detected_2m,chain_detected_5m,chain_detected_10m
 2025-04-03 16:23:00,206.345,206.35,206.2201,206.25,1.0,0.0,0.0,-1.0,,,
 2025-04-03 16:23:05,206.2201,206.26,206.2201,206.255,1.0,,,,,,
 2025-04-03 16:23:10,206.255,206.34,206.19,206.335,1.0,0.0,,,,,

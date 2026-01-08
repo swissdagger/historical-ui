@@ -46,7 +46,7 @@ const timeframeToSeconds = (timeframeId: string): number => {
     return seconds;
 };
 
-const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker, timeframesAtSameTime }) => {
+const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, timeframeId, ticker, timeframesAtSameTime, propagationLevel }) => {
     const [showTooltip, setShowTooltip] = useState(false);
 
     const handleMouseEnter = useCallback(() => setShowTooltip(true), []);
@@ -142,7 +142,7 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
                 onMouseLeave={handleMouseLeave}
             />
             <div style={labelStyle}>
-                {timeframeId}
+                {timeframeId}{propagationLevel !== undefined ? ` (${propagationLevel})` : ''}
             </div>
             {showTooltip && (
                 <div style={tooltipStyle}>

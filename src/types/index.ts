@@ -68,9 +68,10 @@ export interface ArrowPosition {
     value: number;
     datetime: string;
     timeframeId: string;
-    ticker: string; 
+    ticker: string;
     isChangeEnding?: boolean;
     endTime?: string;
+    propagationLevel?: number;
 }
 
 export interface Propagation {
@@ -116,6 +117,7 @@ export interface PredictionArrowProps {
     timeframeId: string;
     ticker: string;
     timeframesAtSameTime?: string[];
+    propagationLevel?: number;
 }
 
 export interface ConnectionStatusProps {

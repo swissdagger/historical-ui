@@ -203,15 +203,16 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="bg-[#242424]">
-            <div className="flex items-center justify-between bg-[#242424] border-b border-[#3a3a3a] px-2 py-0.5 md:px-4 md:py-1 sticky top-0 z-20">
-                <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[#242424] border-b border-[#3a3a3a] px-2 py-2 md:px-4 md:py-1 sticky top-0 z-20 gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <div className="relative">
                         <button
                             onClick={() => setShowFileDropdown(prev => !prev)}
-                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-white hover:bg-[#4a4a4a] transition-colors"
+                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-white hover:bg-[#4a4a4a] transition-colors whitespace-nowrap"
                         >
                             <File size={12} />
-                            <span>{currentFilename ? getDisplayName(currentFilename) : 'Select File'}</span>
+                            <span className="hidden sm:inline">{currentFilename ? getDisplayName(currentFilename) : 'Select File'}</span>
+                            <span className="sm:hidden">{currentFilename ? getDisplayName(currentFilename).substring(0, 15) + '...' : 'File'}</span>
                             <ChevronDown size={12} />
                         </button>
                         {showFileDropdown && (
@@ -237,31 +238,33 @@ const Dashboard: React.FC = () => {
 
                     <button
                         onClick={() => setShowInfoModal(true)}
-                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-white hover:bg-[#4a4a4a] transition-colors"
+                        className="flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium bg-[#3a3a3a] text-white hover:bg-[#4a4a4a] transition-colors whitespace-nowrap"
                     >
                         <Info size={12} />
-                        <span>Info</span>
+                        <span className="hidden sm:inline">Info</span>
                     </button>
 
                     <button
                         onClick={() => setShowAllInsights(prev => !prev)}
-                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${showAllInsights
+                        className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors whitespace-nowrap ${showAllInsights
                                 ? 'bg-green-600 text-white hover:bg-green-700'
                                 : 'bg-[#3a3a3a] text-white hover:bg-[#4a4a4a]'
                             }`}
                     >
-                        <span>All Insights</span>
+                        <span className="hidden sm:inline">All Insights</span>
+                        <span className="sm:hidden">All</span>
                     </button>
 
                     <div className="relative">
                         <button
                             onClick={() => setShowPropagationDropdown(prev => !prev)}
-                            className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors ${selectedPropagationLevel !== null
+                            className={`flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium transition-colors whitespace-nowrap ${selectedPropagationLevel !== null
                                     ? 'bg-orange-600 text-white hover:bg-orange-700'
                                     : 'bg-[#3a3a3a] text-white hover:bg-[#4a4a4a]'
                                 }`}
                         >
-                            <span>{selectedPropagationLevel !== null ? `Level ${selectedPropagationLevel}+` : 'All Levels'}</span>
+                            <span className="hidden sm:inline">{selectedPropagationLevel !== null ? `Level ${selectedPropagationLevel}+` : 'All Levels'}</span>
+                            <span className="sm:hidden">{selectedPropagationLevel !== null ? `L${selectedPropagationLevel}+` : 'Levels'}</span>
                             <ChevronDown size={12} />
                         </button>
                         {showPropagationDropdown && (
@@ -370,28 +373,32 @@ const Dashboard: React.FC = () => {
                             />
                         </div>
                         <div className="bg-[#242424] border-t border-[#3a3a3a] p-4">
-                            <div className="mb-4 flex flex-wrap gap-4">
-                                <div className="flex items-center space-x-2">
-                                    <Calendar size={14} className="text-[#919191]" />
-                                    <label className="text-white text-xs font-medium">Datetime Range:</label>
-                                    <input
-                                        type="text"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a] font-mono"
-                                        placeholder="YYYY-MM-DD HH:MM:SS"
-                                    />
-                                    <span className="text-white text-xs">to</span>
-                                    <input
-                                        type="text"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                        className="px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a] font-mono"
-                                        placeholder="YYYY-MM-DD HH:MM:SS"
-                                    />
+                            <div className="mb-4 flex flex-col lg:flex-row flex-wrap gap-4">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                    <div className="flex items-center space-x-2">
+                                        <Calendar size={14} className="text-[#919191]" />
+                                        <label className="text-white text-xs font-medium whitespace-nowrap">Datetime Range:</label>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                                        <input
+                                            type="text"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            className="px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a] font-mono w-full sm:w-auto"
+                                            placeholder="YYYY-MM-DD HH:MM:SS"
+                                        />
+                                        <span className="text-white text-xs hidden sm:inline">to</span>
+                                        <input
+                                            type="text"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            className="px-2 py-1 text-xs bg-[#3a3a3a] text-[#919191] border border-[#4a4a4a] rounded focus:outline-none focus:border-[#5a5a5a] font-mono w-full sm:w-auto"
+                                            placeholder="YYYY-MM-DD HH:MM:SS"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <label className="text-white text-xs font-medium">Timeframes:</label>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                    <label className="text-white text-xs font-medium whitespace-nowrap">Timeframes:</label>
                                     <MultiSelect
                                         options={availableTimeframes}
                                         value={selectedTimeframes}

@@ -554,6 +554,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         const changeEndings = detectChangeEndings(predictions);
 
+        const propagationLevelMap = new Map<string, number>();
+        if (propagations) {
+            propagations.forEach(prop => {
+                const key = `${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`;
+                const existingLevel = propagationLevelMap.get(key) || 0;
+                if (prop.propagation_level > existingLevel) {
+                    propagationLevelMap.set(key, prop.propagation_level);
+                }
+            });
+        }
+
         const arrowPositions: ArrowPosition[] = [];
 
         let matchedCount = 0;
@@ -612,6 +623,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
             matchedCount++;
 
+            const propKey = `${prediction.datetime}|${prediction.timeframeId}|${prediction.value}`;
+            const propagationLevel = propagationLevelMap.get(propKey);
+
             arrowPositions.push({
                 x: timeCoordinate,
                 y: coordinate,
@@ -619,7 +633,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 datetime: prediction.datetime,
                 timeframeId: prediction.timeframeId,
                 ticker: prediction.ticker,
-                isChangeEnding: false
+                isChangeEnding: false,
+                propagationLevel
             });
         });
 
@@ -677,7 +692,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return arrowPositions;
-    }, [predictions, currentData, showAllInsights, symbol, filterPredictionsByDateAndTimeframe]);
+    }, [predictions, currentData, showAllInsights, symbol, filterPredictionsByDateAndTimeframe, propagations]);
 
     useEffect(() => {
         const newArrowPositions = calculateArrowPositions();
@@ -1055,6 +1070,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                                         timeframeId={position.timeframeId}
                                         ticker={position.ticker}
                                         timeframesAtSameTime={timeframesAtSameTime}
+                                        propagationLevel={position.propagationLevel}
                                     />
                                 );
                             }

@@ -126,6 +126,8 @@ export function extractTrendIndicators(
     const propagations: Propagation[] = [];
     let propagationCounter = 0;
 
+    console.log('[indicatorAnalysis] Starting propagation detection. Initial indicators:', initialIndicators.length);
+
     for (const initialInd of initialIndicators) {
         const currentDatetime = new Date(initialInd.datetime);
         const currentType = initialInd.trend_type;
@@ -168,16 +170,26 @@ export function extractTrendIndicators(
                     break;
                 }
 
-                const currentChainFreqPredictions = allPredictions[sortedTimeframes[currentChainTimeframeIndex]] || [];
                 const opposingSignalValue = -currentType;
                 const nextSignalTime = nextSignalDatetime.getTime();
 
-                const opposingSignalFound = currentChainFreqPredictions.some(pred => {
-                    const predTime = new Date(pred.datetime).getTime();
-                    return predTime > currentChainTime &&
-                           predTime <= nextSignalTime &&
-                           pred.value === opposingSignalValue;
-                });
+                let opposingSignalFound = false;
+                for (let k = currentTimeframeIndex; k <= currentChainTimeframeIndex; k++) {
+                    const checkTimeframe = sortedTimeframes[k];
+                    const checkPredictions = allPredictions[checkTimeframe] || [];
+
+                    const hasOpposingSignal = checkPredictions.some(pred => {
+                        const predTime = new Date(pred.datetime).getTime();
+                        return predTime > currentChainTime &&
+                               predTime <= nextSignalTime &&
+                               pred.value === opposingSignalValue;
+                    });
+
+                    if (hasOpposingSignal) {
+                        opposingSignalFound = true;
+                        break;
+                    }
+                }
 
                 if (!opposingSignalFound) {
                     propagationLevel++;
@@ -186,7 +198,7 @@ export function extractTrendIndicators(
                         ? ((propOpenPrice - initialOpenPrice) / initialOpenPrice) * 100
                         : 0;
 
-                    propagations.push({
+                    const propagation = {
                         propagation_id: currentPropagationId,
                         propagation_level: propagationLevel,
                         datetime: nextSignal.datetime,
@@ -195,17 +207,37 @@ export function extractTrendIndicators(
                         lower_freq: nextLowerTimeframe,
                         open_price: propOpenPrice,
                         directional_change_percent: directionalChange
+                    };
+
+                    console.log('[indicatorAnalysis] Detected propagation:', {
+                        level: propagationLevel,
+                        from: sortedTimeframes[currentChainTimeframeIndex],
+                        to: nextLowerTimeframe,
+                        datetime: nextSignal.datetime,
+                        type: currentType > 0 ? 'up' : 'down'
                     });
+
+                    propagations.push(propagation);
 
                     currentChainDatetime = nextSignalDatetime;
                     currentChainTimeframeIndex = j;
                 } else {
+                    console.log('[indicatorAnalysis] Propagation blocked by opposing signal:', {
+                        from: sortedTimeframes[currentChainTimeframeIndex],
+                        to: nextLowerTimeframe,
+                        datetime: nextSignal.datetime
+                    });
                     break;
                 }
             } else {
                 break;
             }
         }
+    }
+
+    console.log('[indicatorAnalysis] Total propagations detected:', propagations.length);
+    if (propagations.length > 0) {
+        console.log('[indicatorAnalysis] Sample propagations:', propagations.slice(0, 5));
     }
 
     return { initialIndicators, propagations };

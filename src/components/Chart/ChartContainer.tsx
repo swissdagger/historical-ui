@@ -555,7 +555,10 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         const changeEndings = detectChangeEndings(predictions);
 
         const propagationLevelMap = new Map<string, number>();
-        if (propagations) {
+        if (propagations && propagations.length > 0) {
+            console.log('[ChartContainer] Building propagation map from', propagations.length, 'propagations');
+            console.log('[ChartContainer] Sample propagation:', propagations[0]);
+
             propagations.forEach(prop => {
                 const key = `${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`;
                 const existingLevel = propagationLevelMap.get(key) || 0;
@@ -563,6 +566,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                     propagationLevelMap.set(key, prop.propagation_level);
                 }
             });
+
+            console.log('[ChartContainer] Propagation map size:', propagationLevelMap.size);
+            console.log('[ChartContainer] Sample keys:', Array.from(propagationLevelMap.keys()).slice(0, 3));
         }
 
         const arrowPositions: ArrowPosition[] = [];
@@ -625,6 +631,16 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
             const propKey = `${prediction.datetime}|${prediction.timeframeId}|${prediction.value}`;
             const propagationLevel = propagationLevelMap.get(propKey);
+
+            if (index < 5) {
+                console.log('[ChartContainer] Prediction arrow lookup:', {
+                    datetime: prediction.datetime,
+                    timeframe: prediction.timeframeId,
+                    value: prediction.value,
+                    lookupKey: propKey,
+                    foundLevel: propagationLevel
+                });
+            }
 
             arrowPositions.push({
                 x: timeCoordinate,

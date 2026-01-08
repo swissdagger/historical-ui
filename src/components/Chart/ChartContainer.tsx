@@ -541,40 +541,26 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         return changeEndings;
     };
 
-    // Function to filter predictions to show only signal changes
-    const filterSignalChanges = (predictions: PredictionEntry[]): PredictionEntry[] => {
-        // Group predictions by timeframe
-        const predictionsByTimeframe: Record<string, PredictionEntry[]> = {};
+    // Function to filter predictions to show only propagations and initial indicators
+    const filterPropagationsAndInitialIndicators = (predictions: PredictionEntry[]): PredictionEntry[] => {
+        // Build a set of valid prediction keys from propagations and initial indicators
+        const validPredictionKeys = new Set<string>();
 
-        predictions.forEach(prediction => {
-            if (!predictionsByTimeframe[prediction.timeframeId]) {
-                predictionsByTimeframe[prediction.timeframeId] = [];
-            }
-            predictionsByTimeframe[prediction.timeframeId].push(prediction);
+        // Add all propagation events
+        propagations.forEach(prop => {
+            validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
         });
 
-        // Filter each timeframe's predictions to show only signal changes
-        const filteredPredictions: PredictionEntry[] = [];
-
-        Object.keys(predictionsByTimeframe).forEach(timeframeId => {
-            const timeframePredictions = predictionsByTimeframe[timeframeId]
-                .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
-
-            let lastSignal: number | null = null;
-
-            timeframePredictions.forEach(prediction => {
-                // Normalize prediction value to signal (+1 for positive, -1 for negative)
-                const currentSignal = prediction.value > 0 ? 1 : -1;
-
-                // Show this prediction if it's the first one or if signal changed
-                if (lastSignal === null || currentSignal !== lastSignal) {
-                    filteredPredictions.push(prediction);
-                    lastSignal = currentSignal;
-                }
-            });
+        // Add all initial indicators
+        initialIndicators.forEach(initialInd => {
+            validPredictionKeys.add(`${initialInd.datetime}|${initialInd.timeframe}|${initialInd.trend_type}`);
         });
 
-        return filteredPredictions;
+        // Filter predictions to only include those in the valid set
+        return predictions.filter(pred => {
+            const predKey = `${pred.datetime}|${pred.timeframeId}|${pred.value}`;
+            return validPredictionKeys.has(predKey);
+        });
     };
 
     const calculateArrowPositions = useCallback((): ArrowPosition[] => {
@@ -610,7 +596,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
         const predictionsToShow = showAllInsights
             ? filteredPredictions
-            : filterSignalChanges(filteredPredictions);
+            : filterPropagationsAndInitialIndicators(filteredPredictions);
 
         console.log('[ChartContainer] predictionsToShow after filtering:', predictionsToShow.length);
 
@@ -770,7 +756,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return arrowPositions;
-    }, [predictions, currentData, showAllInsights, symbol, filterPredictionsByDateAndTimeframe, propagations]);
+    }, [predictions, currentData, showAllInsights, symbol, filterPredictionsByDateAndTimeframe, propagations, initialIndicators]);
 
     useEffect(() => {
         const newArrowPositions = calculateArrowPositions();

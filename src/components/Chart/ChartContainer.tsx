@@ -526,7 +526,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             });
 
             // Check for gap at the end of data
-            if (consecutiveZeros >= 3 && gapStartTime) {
+            if (consecutiveZeros >= 100000000 && gapStartTime) {
                 const gapStart = new Date(gapStartTime.replace(' ', 'T') + 'Z');
                 const gapEnd = new Date(gapStart.getTime() + (consecutiveZeros * intervalMinutes * 60 * 1000));
 

@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
     const [showPropagationDropdown, setShowPropagationDropdown] = useState(false);
     const [initialIndicatorsPage, setInitialIndicatorsPage] = useState(1);
     const [propagationsPage, setPropagationsPage] = useState(1);
-    const itemsPerPage = 100;
+    const itemsPerPage = 30;
 
     const [userSelectedTimeframes, setUserSelectedTimeframes] = useState<TimeframeConfig[]>(
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)

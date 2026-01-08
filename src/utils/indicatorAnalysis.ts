@@ -20,6 +20,18 @@ export interface Propagation {
     directional_change_percent: number;
 }
 
+interface ActiveChain {
+    chainId: string;
+    initialDatetime: Date;
+    endDatetime: Date;
+    trendType: number;
+    initialOpenPrice: number;
+    currentTimeframeIndex: number;
+    nextExpectedTimeframeIndex: number;
+    propagationLevel: number;
+    isActive: boolean;
+}
+
 function timeframeToSeconds(timeframe: string): number {
     const match = timeframe.match(/^(\d+)(s|m|h|d|w|mo)$/);
     if (!match) return 0;
@@ -122,120 +134,125 @@ export function extractTrendIndicators(
         }
     }
 
-    // Step 2: Identify cross-timeframe propagations
+    // Step 2: Multi-chain propagation tracking
     const propagations: Propagation[] = [];
-    let propagationCounter = 0;
+    const activeChains: ActiveChain[] = [];
+    let chainCounter = 0;
 
-    console.log('[indicatorAnalysis] Starting propagation detection. Initial indicators:', initialIndicators.length);
+    console.log('[indicatorAnalysis] Starting multi-chain propagation detection. Initial indicators:', initialIndicators.length);
 
+    // Create active chains from initial indicators
     for (const initialInd of initialIndicators) {
-        const currentDatetime = new Date(initialInd.datetime);
-        const currentType = initialInd.trend_type;
-        const currentTimeframeIndex = timeframeIndexMap.get(initialInd.timeframe) ?? 0;
-        const endDatetime = initialInd.end_datetime ? new Date(initialInd.end_datetime) : null;
-        const initialOpenPrice = initialInd.open_price;
-
+        const endDatetime = initialInd.end_datetime ? new Date(initialInd.end_datetime.replace(' ', 'T') + 'Z') : null;
         if (!endDatetime) continue;
 
-        let currentChainDatetime = currentDatetime;
-        let currentChainTimeframeIndex = currentTimeframeIndex;
-        let propagationLevel = 0;
+        chainCounter++;
+        const chain: ActiveChain = {
+            chainId: `Chain_${chainCounter}`,
+            initialDatetime: new Date(initialInd.datetime.replace(' ', 'T') + 'Z'),
+            endDatetime: endDatetime,
+            trendType: initialInd.trend_type,
+            initialOpenPrice: initialInd.open_price,
+            currentTimeframeIndex: 0, // Start at highest frequency
+            nextExpectedTimeframeIndex: 1, // Next timeframe to check
+            propagationLevel: 0,
+            isActive: true
+        };
+        activeChains.push(chain);
+        console.log('[indicatorAnalysis] Created chain:', chain.chainId, 'at', initialInd.datetime, 'type:', chain.trendType > 0 ? 'up' : 'down');
+    }
 
-        propagationCounter++;
-        const currentPropagationId = `Prop_${propagationCounter}`;
+    // Collect all signals from all timeframes with their metadata
+    interface SignalEvent {
+        datetime: Date;
+        datetimeString: string;
+        timeframeIndex: number;
+        timeframe: string;
+        value: number;
+    }
 
-        for (let j = currentChainTimeframeIndex + 1; j < sortedTimeframes.length; j++) {
-            const nextLowerTimeframe = sortedTimeframes[j];
-            const nextLowerPredictions = allPredictions[nextLowerTimeframe] || [];
+    const allSignals: SignalEvent[] = [];
+    sortedTimeframes.forEach((tf, tfIndex) => {
+        const predictions = allPredictions[tf] || [];
+        predictions.forEach(pred => {
+            if (pred.value !== 0) {
+                allSignals.push({
+                    datetime: new Date(pred.datetime.replace(' ', 'T') + 'Z'),
+                    datetimeString: pred.datetime,
+                    timeframeIndex: tfIndex,
+                    timeframe: tf,
+                    value: pred.value
+                });
+            }
+        });
+    });
 
-            const currentChainTime = currentChainDatetime.getTime();
-            const endTime = endDatetime.getTime();
+    // Sort all signals chronologically
+    allSignals.sort((a, b) => a.datetime.getTime() - b.datetime.getTime());
 
-            const laterSignals = nextLowerPredictions.filter(pred => {
-                const predTime = new Date(pred.datetime).getTime();
-                return predTime >= currentChainTime &&
-                       predTime <= endTime &&
-                       pred.value === currentType;
-            }).sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+    console.log('[indicatorAnalysis] Processing', allSignals.length, 'signals across', sortedTimeframes.length, 'timeframes');
 
-            if (laterSignals.length > 0) {
-                const nextSignal = laterSignals[0];
-                const nextSignalDatetime = new Date(nextSignal.datetime);
+    // Process signals chronologically
+    for (const signal of allSignals) {
+        // Check each active chain to see if it can propagate or should be invalidated
+        for (const chain of activeChains) {
+            if (!chain.isActive) continue;
 
-                const previousPredictions = nextLowerPredictions
-                    .filter(pred => new Date(pred.datetime).getTime() < currentChainTime && pred.value !== 0)
-                    .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+            const signalTime = signal.datetime.getTime();
+            const chainStartTime = chain.initialDatetime.getTime();
+            const chainEndTime = chain.endDatetime.getTime();
 
-                if (previousPredictions.length > 0 && previousPredictions[0].value === currentType) {
-                    break;
-                }
+            // Signal must be within the chain's time window
+            if (signalTime < chainStartTime || signalTime > chainEndTime) continue;
 
-                const opposingSignalValue = -currentType;
-                const nextSignalTime = nextSignalDatetime.getTime();
-
-                let opposingSignalFound = false;
-                for (let k = currentTimeframeIndex; k <= currentChainTimeframeIndex; k++) {
-                    const checkTimeframe = sortedTimeframes[k];
-                    const checkPredictions = allPredictions[checkTimeframe] || [];
-
-                    const hasOpposingSignal = checkPredictions.some(pred => {
-                        const predTime = new Date(pred.datetime).getTime();
-                        return predTime > currentChainTime &&
-                               predTime <= nextSignalTime &&
-                               pred.value === opposingSignalValue;
-                    });
-
-                    if (hasOpposingSignal) {
-                        opposingSignalFound = true;
-                        break;
-                    }
-                }
-
-                if (!opposingSignalFound) {
-                    propagationLevel++;
-                    const propOpenPrice = getOpenPriceAtDatetime(csvData, nextSignal.datetime, timeToPriceMap);
-                    const directionalChange = initialOpenPrice !== 0
-                        ? ((propOpenPrice - initialOpenPrice) / initialOpenPrice) * 100
+            // Check if this signal is on the next expected timeframe for this chain
+            if (signal.timeframeIndex === chain.nextExpectedTimeframeIndex) {
+                if (signal.value === chain.trendType) {
+                    // This is a propagation! The chain continues to the next level
+                    chain.propagationLevel++;
+                    const propOpenPrice = getOpenPriceAtDatetime(csvData, signal.datetimeString, timeToPriceMap);
+                    const directionalChange = chain.initialOpenPrice !== 0
+                        ? ((propOpenPrice - chain.initialOpenPrice) / chain.initialOpenPrice) * 100
                         : 0;
 
-                    const propagation = {
-                        propagation_id: currentPropagationId,
-                        propagation_level: propagationLevel,
-                        datetime: nextSignal.datetime,
-                        trend_type: currentType,
-                        higher_freq: sortedTimeframes[currentChainTimeframeIndex],
-                        lower_freq: nextLowerTimeframe,
+                    const propagation: Propagation = {
+                        propagation_id: chain.chainId,
+                        propagation_level: chain.propagationLevel,
+                        datetime: signal.datetimeString,
+                        trend_type: chain.trendType,
+                        higher_freq: sortedTimeframes[chain.currentTimeframeIndex],
+                        lower_freq: signal.timeframe,
                         open_price: propOpenPrice,
                         directional_change_percent: directionalChange
                     };
 
-                    console.log('[indicatorAnalysis] Detected propagation:', {
-                        level: propagationLevel,
-                        from: sortedTimeframes[currentChainTimeframeIndex],
-                        to: nextLowerTimeframe,
-                        datetime: nextSignal.datetime,
-                        type: currentType > 0 ? 'up' : 'down'
-                    });
-
                     propagations.push(propagation);
+                    console.log('[indicatorAnalysis] Chain', chain.chainId, 'propagated to level', chain.propagationLevel,
+                        'at', signal.datetimeString, 'from', sortedTimeframes[chain.currentTimeframeIndex], 'to', signal.timeframe);
 
-                    currentChainDatetime = nextSignalDatetime;
-                    currentChainTimeframeIndex = j;
-                } else {
-                    console.log('[indicatorAnalysis] Propagation blocked by opposing signal:', {
-                        from: sortedTimeframes[currentChainTimeframeIndex],
-                        to: nextLowerTimeframe,
-                        datetime: nextSignal.datetime
-                    });
-                    break;
+                    // Update chain state
+                    chain.currentTimeframeIndex = signal.timeframeIndex;
+                    chain.nextExpectedTimeframeIndex = signal.timeframeIndex + 1;
+
+                    // If we've reached the last timeframe, deactivate the chain
+                    if (chain.nextExpectedTimeframeIndex >= sortedTimeframes.length) {
+                        chain.isActive = false;
+                        console.log('[indicatorAnalysis] Chain', chain.chainId, 'completed (reached last timeframe)');
+                    }
+                } else if (signal.value === -chain.trendType) {
+                    // Opposing signal on the next expected timeframe - invalidate this chain
+                    chain.isActive = false;
+                    console.log('[indicatorAnalysis] Chain', chain.chainId, 'invalidated by opposing signal on',
+                        signal.timeframe, 'at', signal.datetimeString);
                 }
-            } else {
-                break;
             }
         }
     }
 
+    const activeChainCount = activeChains.filter(c => c.isActive).length;
+    const completedChainCount = activeChains.filter(c => !c.isActive).length;
     console.log('[indicatorAnalysis] Total propagations detected:', propagations.length);
+    console.log('[indicatorAnalysis] Chains: ', activeChains.length, 'created,', completedChainCount, 'completed/invalidated,', activeChainCount, 'still active');
     if (propagations.length > 0) {
         console.log('[indicatorAnalysis] Sample propagations:', propagations.slice(0, 5));
     }

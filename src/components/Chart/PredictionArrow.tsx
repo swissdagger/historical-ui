@@ -142,7 +142,7 @@ const PredictionArrow: React.FC<PredictionArrowProps> = ({ value, position, time
                 onMouseLeave={handleMouseLeave}
             />
             <div style={labelStyle}>
-                {timeframeId}{propagationLevel !== undefined ? ` (${propagationLevel})` : ''}
+                {timeframeId}
             </div>
             {showTooltip && (
                 <div style={tooltipStyle}>

@@ -246,10 +246,9 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             filtered = filtered.filter(pred => timeframeSet.has(pred.timeframeId));
         }
 
-        if (selectedPropagationLevel !== null && displayPropagations.length > 0) {
-            // Build map using the COMPLETE propagations (not display-filtered) to preserve chain integrity
+        if (selectedPropagationLevel !== null && propagations.length > 0) {
+            // Step 1: Build complete chain structure using ALL propagations (unfiltered)
             const propagationIdToMaxLevel = new Map<string, number>();
-
             propagations.forEach(prop => {
                 const currentMax = propagationIdToMaxLevel.get(prop.propagation_id) || 0;
                 if (prop.propagation_level > currentMax) {
@@ -257,38 +256,38 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 }
             });
 
+            // Step 2: Filter chains by propagation level threshold
             const filteredPropagationIds = Array.from(propagationIdToMaxLevel.entries())
                 .filter(([_, maxLevel]) => maxLevel >= selectedPropagationLevel)
                 .map(([id, _]) => id);
 
             const filteredPropagationSet = new Set(filteredPropagationIds);
-            // Use display-filtered propagations for building the valid prediction keys
-            const validPropagations = displayPropagations.filter(prop =>
-                filteredPropagationSet.has(prop.propagation_id)
-            );
 
+            // Step 3: Build valid prediction keys using COMPLETE propagations (not display-filtered)
+            // This ensures chain membership is consistent regardless of display filters
             const validPredictionKeys = new Set<string>();
 
-            validPropagations.forEach(prop => {
-                validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
+            propagations.forEach(prop => {
+                if (filteredPropagationSet.has(prop.propagation_id)) {
+                    validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
+                }
             });
 
-            // Match current Chain_X format (not old Prop_X format)
+            // Step 4: Add initial indicators from qualifying chains
             filteredPropagationIds.forEach(propId => {
                 const match = propId.match(/^Chain_(\d+)$/);
                 if (match) {
                     const chainNumber = parseInt(match[1], 10);
-                    // Find initial indicator with matching chain ID in display-filtered list
-                    const initialInd = displayInitialIndicators.find((ind, idx) => {
-                        // Chain_1 corresponds to first initial indicator, etc.
-                        return idx + 1 === chainNumber;
-                    });
-                    if (initialInd) {
+                    // Use complete initialIndicators list, not display-filtered
+                    if (chainNumber > 0 && chainNumber <= initialIndicators.length) {
+                        const initialInd = initialIndicators[chainNumber - 1];
                         validPredictionKeys.add(`${initialInd.datetime}|${initialInd.timeframe}|${initialInd.trend_type}`);
                     }
                 }
             });
 
+            // Step 5: Filter predictions by chain membership
+            // The timeframe/date filtering already happened above, so this just filters by chain
             filtered = filtered.filter(pred => {
                 const predKey = `${pred.datetime}|${pred.timeframeId}|${pred.value}`;
                 return validPredictionKeys.has(predKey);
@@ -296,7 +295,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return filtered;
-    }, [selectedTimeframes, startDate, endDate, selectedPropagationLevel, propagations, displayPropagations, displayInitialIndicators]);
+    }, [selectedTimeframes, startDate, endDate, selectedPropagationLevel, propagations, initialIndicators]);
 
     const filterKlinesByDateRange = useCallback((klines: CandlestickData[]): CandlestickData[] => {
         if (!startDate && !endDate) {

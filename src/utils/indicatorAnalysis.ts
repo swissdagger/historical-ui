@@ -122,115 +122,143 @@ export function extractTrendIndicators(
         }
     }
 
-    // Step 2: Identify cross-timeframe propagations
+    // Step 2: Identify cross-timeframe propagations with dynamic chain tracking
     const propagations: Propagation[] = [];
     let propagationCounter = 0;
 
     console.log('[indicatorAnalysis] Starting propagation detection. Initial indicators:', initialIndicators.length);
 
+    // Track all signals across all timeframes with their metadata
+    interface SignalInfo {
+        datetime: string;
+        datetimeMs: number;
+        timeframe: string;
+        timeframeIndex: number;
+        trendType: number;
+        openPrice: number;
+        propagationLevel: number;
+        propagationId: string;
+        chainInitialPrice: number;
+    }
+
+    const allSignals: SignalInfo[] = [];
+
+    // Add initial indicators as level 0
     for (const initialInd of initialIndicators) {
-        const currentDatetime = new Date(initialInd.datetime);
-        const currentType = initialInd.trend_type;
-        const currentTimeframeIndex = timeframeIndexMap.get(initialInd.timeframe) ?? 0;
-        const endDatetime = initialInd.end_datetime ? new Date(initialInd.end_datetime) : null;
-        const initialOpenPrice = initialInd.open_price;
-
-        if (!endDatetime) continue;
-
-        let currentChainDatetime = currentDatetime;
-        let currentChainTimeframeIndex = currentTimeframeIndex;
-        let propagationLevel = 0;
-
         propagationCounter++;
-        const currentPropagationId = `Prop_${propagationCounter}`;
+        allSignals.push({
+            datetime: initialInd.datetime,
+            datetimeMs: new Date(initialInd.datetime).getTime(),
+            timeframe: initialInd.timeframe,
+            timeframeIndex: timeframeIndexMap.get(initialInd.timeframe) ?? 0,
+            trendType: initialInd.trend_type,
+            openPrice: initialInd.open_price,
+            propagationLevel: 0,
+            propagationId: `Prop_${propagationCounter}`,
+            chainInitialPrice: initialInd.open_price
+        });
+    }
 
-        for (let j = currentChainTimeframeIndex + 1; j < sortedTimeframes.length; j++) {
-            const nextLowerTimeframe = sortedTimeframes[j];
-            const nextLowerPredictions = allPredictions[nextLowerTimeframe] || [];
+    // Process each timeframe from high to low frequency
+    for (let i = 1; i < sortedTimeframes.length; i++) {
+        const currentTimeframe = sortedTimeframes[i];
+        const currentPredictions = allPredictions[currentTimeframe] || [];
 
-            const currentChainTime = currentChainDatetime.getTime();
-            const endTime = endDatetime.getTime();
+        // For each signal on this timeframe
+        for (const pred of currentPredictions) {
+            if (pred.value === 0) continue;
 
-            const laterSignals = nextLowerPredictions.filter(pred => {
-                const predTime = new Date(pred.datetime).getTime();
-                return predTime >= currentChainTime &&
-                       predTime <= endTime &&
-                       pred.value === currentType;
-            }).sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+            const predDatetimeMs = new Date(pred.datetime).getTime();
 
-            if (laterSignals.length > 0) {
-                const nextSignal = laterSignals[0];
-                const nextSignalDatetime = new Date(nextSignal.datetime);
+            // Check if this signal was already preceded by the same signal type on this timeframe
+            const previousSameTypeSignal = currentPredictions.find(p => {
+                const pTime = new Date(p.datetime).getTime();
+                return pTime < predDatetimeMs && p.value === pred.value && p.value !== 0;
+            });
 
-                const previousPredictions = nextLowerPredictions
-                    .filter(pred => new Date(pred.datetime).getTime() < currentChainTime && pred.value !== 0)
-                    .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+            if (previousSameTypeSignal) {
+                continue; // Skip if already had this signal type
+            }
 
-                if (previousPredictions.length > 0 && previousPredictions[0].value === currentType) {
+            // Find all potential parent signals from higher frequency timeframes
+            const potentialParents = allSignals.filter(signal =>
+                signal.timeframeIndex < i && // Higher frequency
+                signal.trendType === pred.value && // Same direction
+                signal.datetimeMs <= predDatetimeMs // Parent came before or at the same time
+            );
+
+            if (potentialParents.length === 0) continue;
+
+            // Sort by most recent and highest propagation level
+            potentialParents.sort((a, b) => {
+                if (b.propagationLevel !== a.propagationLevel) {
+                    return b.propagationLevel - a.propagationLevel;
+                }
+                return b.datetimeMs - a.datetimeMs;
+            });
+
+            // Try each potential parent until we find a valid one
+            let validParent: SignalInfo | null = null;
+
+            for (const parent of potentialParents) {
+                // Check if the parent's timeframe has an opposing signal between parent time and current signal time
+                const parentTimeframePredictions = allPredictions[parent.timeframe] || [];
+                const opposingSignalValue = -parent.trendType;
+
+                const hasOpposingSignal = parentTimeframePredictions.some(p => {
+                    const pTime = new Date(p.datetime).getTime();
+                    return pTime > parent.datetimeMs &&
+                           pTime <= predDatetimeMs &&
+                           p.value === opposingSignalValue;
+                });
+
+                if (!hasOpposingSignal) {
+                    validParent = parent;
                     break;
                 }
+            }
 
-                const opposingSignalValue = -currentType;
-                const nextSignalTime = nextSignalDatetime.getTime();
+            if (validParent) {
+                const propOpenPrice = getOpenPriceAtDatetime(csvData, pred.datetime, timeToPriceMap);
+                const newPropagationLevel = validParent.propagationLevel + 1;
+                const directionalChange = validParent.chainInitialPrice !== 0
+                    ? ((propOpenPrice - validParent.chainInitialPrice) / validParent.chainInitialPrice) * 100
+                    : 0;
 
-                let opposingSignalFound = false;
-                for (let k = currentTimeframeIndex; k <= currentChainTimeframeIndex; k++) {
-                    const checkTimeframe = sortedTimeframes[k];
-                    const checkPredictions = allPredictions[checkTimeframe] || [];
+                const propagation: Propagation = {
+                    propagation_id: validParent.propagationId,
+                    propagation_level: newPropagationLevel,
+                    datetime: pred.datetime,
+                    trend_type: pred.value,
+                    higher_freq: validParent.timeframe,
+                    lower_freq: currentTimeframe,
+                    open_price: propOpenPrice,
+                    directional_change_percent: directionalChange
+                };
 
-                    const hasOpposingSignal = checkPredictions.some(pred => {
-                        const predTime = new Date(pred.datetime).getTime();
-                        return predTime > currentChainTime &&
-                               predTime <= nextSignalTime &&
-                               pred.value === opposingSignalValue;
-                    });
+                console.log('[indicatorAnalysis] Detected propagation:', {
+                    level: newPropagationLevel,
+                    from: validParent.timeframe,
+                    to: currentTimeframe,
+                    datetime: pred.datetime,
+                    type: pred.value > 0 ? 'up' : 'down',
+                    parentLevel: validParent.propagationLevel
+                });
 
-                    if (hasOpposingSignal) {
-                        opposingSignalFound = true;
-                        break;
-                    }
-                }
+                propagations.push(propagation);
 
-                if (!opposingSignalFound) {
-                    propagationLevel++;
-                    const propOpenPrice = getOpenPriceAtDatetime(csvData, nextSignal.datetime, timeToPriceMap);
-                    const directionalChange = initialOpenPrice !== 0
-                        ? ((propOpenPrice - initialOpenPrice) / initialOpenPrice) * 100
-                        : 0;
-
-                    const propagation = {
-                        propagation_id: currentPropagationId,
-                        propagation_level: propagationLevel,
-                        datetime: nextSignal.datetime,
-                        trend_type: currentType,
-                        higher_freq: sortedTimeframes[currentChainTimeframeIndex],
-                        lower_freq: nextLowerTimeframe,
-                        open_price: propOpenPrice,
-                        directional_change_percent: directionalChange
-                    };
-
-                    console.log('[indicatorAnalysis] Detected propagation:', {
-                        level: propagationLevel,
-                        from: sortedTimeframes[currentChainTimeframeIndex],
-                        to: nextLowerTimeframe,
-                        datetime: nextSignal.datetime,
-                        type: currentType > 0 ? 'up' : 'down'
-                    });
-
-                    propagations.push(propagation);
-
-                    currentChainDatetime = nextSignalDatetime;
-                    currentChainTimeframeIndex = j;
-                } else {
-                    console.log('[indicatorAnalysis] Propagation blocked by opposing signal:', {
-                        from: sortedTimeframes[currentChainTimeframeIndex],
-                        to: nextLowerTimeframe,
-                        datetime: nextSignal.datetime
-                    });
-                    break;
-                }
-            } else {
-                break;
+                // Add this as a new signal that can be a parent for even lower frequencies
+                allSignals.push({
+                    datetime: pred.datetime,
+                    datetimeMs: predDatetimeMs,
+                    timeframe: currentTimeframe,
+                    timeframeIndex: i,
+                    trendType: pred.value,
+                    openPrice: propOpenPrice,
+                    propagationLevel: newPropagationLevel,
+                    propagationId: validParent.propagationId,
+                    chainInitialPrice: validParent.chainInitialPrice
+                });
             }
         }
     }

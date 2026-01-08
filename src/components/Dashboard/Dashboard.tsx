@@ -52,6 +52,9 @@ const Dashboard: React.FC = () => {
     const [availableTimeframes, setAvailableTimeframes] = useState<string[]>([]);
     const [selectedPropagationLevel, setSelectedPropagationLevel] = useState<number | null>(null);
     const [showPropagationDropdown, setShowPropagationDropdown] = useState(false);
+    const [initialIndicatorsPage, setInitialIndicatorsPage] = useState(1);
+    const [propagationsPage, setPropagationsPage] = useState(1);
+    const itemsPerPage = 100;
 
     const [userSelectedTimeframes, setUserSelectedTimeframes] = useState<TimeframeConfig[]>(
         getInitialTimeframes('DEFAULT', showHistoricalPerformance)
@@ -190,6 +193,11 @@ const Dashboard: React.FC = () => {
             maxPropagationLevel: maxLevel
         };
     }, [currentFileId, allPredictionsData, availableTimeframes]);
+
+    useEffect(() => {
+        setInitialIndicatorsPage(1);
+        setPropagationsPage(1);
+    }, [currentFileId, startDate, endDate, selectedTimeframes]);
 
     return (
         <div className="bg-[#242424]">
@@ -399,7 +407,30 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <div className="mb-6">
-                                <h3 className="text-white font-medium mb-3 text-sm">Initial Indicators</h3>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-white font-medium text-sm">Initial Indicators</h3>
+                                    {initialIndicators.length > itemsPerPage && (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setInitialIndicatorsPage(p => Math.max(1, p - 1))}
+                                                disabled={initialIndicatorsPage === 1}
+                                                className="px-2 py-1 text-xs bg-[#3a3a3a] text-white rounded hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Previous
+                                            </button>
+                                            <span className="text-xs text-[#919191]">
+                                                Page {initialIndicatorsPage} of {Math.ceil(initialIndicators.length / itemsPerPage)}
+                                            </span>
+                                            <button
+                                                onClick={() => setInitialIndicatorsPage(p => Math.min(Math.ceil(initialIndicators.length / itemsPerPage), p + 1))}
+                                                disabled={initialIndicatorsPage >= Math.ceil(initialIndicators.length / itemsPerPage)}
+                                                className="px-2 py-1 text-xs bg-[#3a3a3a] text-white rounded hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
@@ -414,8 +445,9 @@ const Dashboard: React.FC = () => {
                                         </thead>
                                         <tbody>
                                             {initialIndicators.length > 0 ? (
-                                                <>
-                                                    {initialIndicators.slice(0, 100).map((ind, idx) => (
+                                                initialIndicators
+                                                    .slice((initialIndicatorsPage - 1) * itemsPerPage, initialIndicatorsPage * itemsPerPage)
+                                                    .map((ind, idx) => (
                                                         <tr key={idx} className="hover:bg-[#2a2a2a]">
                                                             <td className="border border-[#4a4a4a] px-2 py-1 font-mono text-white">{ind.datetime}</td>
                                                             <td className="border border-[#4a4a4a] px-2 py-1">
@@ -428,15 +460,7 @@ const Dashboard: React.FC = () => {
                                                             <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.open_price.toFixed(2)}</td>
                                                             <td className="border border-[#4a4a4a] px-2 py-1 text-white">{ind.directional_change_percent.toFixed(2)}%</td>
                                                         </tr>
-                                                    ))}
-                                                    {initialIndicators.length > 100 && (
-                                                        <tr>
-                                                            <td colSpan={6} className="border border-[#4a4a4a] px-2 py-2 text-center text-[#909090] italic">
-                                                                Showing 100 of {initialIndicators.length} indicators (use filters to reduce data)
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </>
+                                                    ))
                                             ) : (
                                                 <tr>
                                                     <td colSpan={6} className="border border-[#4a4a4a] px-2 py-3 text-center text-[#707070]">
@@ -447,10 +471,38 @@ const Dashboard: React.FC = () => {
                                         </tbody>
                                     </table>
                                 </div>
+                                {initialIndicators.length > 0 && (
+                                    <div className="mt-2 text-xs text-[#909090] text-center">
+                                        Showing {Math.min((initialIndicatorsPage - 1) * itemsPerPage + 1, initialIndicators.length)}-{Math.min(initialIndicatorsPage * itemsPerPage, initialIndicators.length)} of {initialIndicators.length} indicators
+                                    </div>
+                                )}
                             </div>
 
                             <div>
-                                <h3 className="text-white font-medium mb-3 text-sm">Propagations</h3>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-white font-medium text-sm">Propagations</h3>
+                                    {propagations.length > itemsPerPage && (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setPropagationsPage(p => Math.max(1, p - 1))}
+                                                disabled={propagationsPage === 1}
+                                                className="px-2 py-1 text-xs bg-[#3a3a3a] text-white rounded hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Previous
+                                            </button>
+                                            <span className="text-xs text-[#919191]">
+                                                Page {propagationsPage} of {Math.ceil(propagations.length / itemsPerPage)}
+                                            </span>
+                                            <button
+                                                onClick={() => setPropagationsPage(p => Math.min(Math.ceil(propagations.length / itemsPerPage), p + 1))}
+                                                disabled={propagationsPage >= Math.ceil(propagations.length / itemsPerPage)}
+                                                className="px-2 py-1 text-xs bg-[#3a3a3a] text-white rounded hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-xs border-collapse">
                                         <thead>
@@ -467,8 +519,9 @@ const Dashboard: React.FC = () => {
                                         </thead>
                                         <tbody>
                                             {propagations.length > 0 ? (
-                                                <>
-                                                    {propagations.slice(0, 100).map((prop, idx) => (
+                                                propagations
+                                                    .slice((propagationsPage - 1) * itemsPerPage, propagationsPage * itemsPerPage)
+                                                    .map((prop, idx) => (
                                                         <tr key={idx} className="hover:bg-[#2a2a2a]">
                                                             <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_id}</td>
                                                             <td className="border border-[#4a4a4a] px-2 py-1 text-white">{prop.propagation_level}</td>
@@ -487,15 +540,7 @@ const Dashboard: React.FC = () => {
                                                                 </span>
                                                             </td>
                                                         </tr>
-                                                    ))}
-                                                    {propagations.length > 100 && (
-                                                        <tr>
-                                                            <td colSpan={8} className="border border-[#4a4a4a] px-2 py-2 text-center text-[#909090] italic">
-                                                                Showing 100 of {propagations.length} propagations (use filters to reduce data)
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </>
+                                                    ))
                                             ) : (
                                                 <tr>
                                                     <td colSpan={8} className="border border-[#4a4a4a] px-2 py-3 text-center text-[#707070]">
@@ -506,6 +551,11 @@ const Dashboard: React.FC = () => {
                                         </tbody>
                                     </table>
                                 </div>
+                                {propagations.length > 0 && (
+                                    <div className="mt-2 text-xs text-[#909090] text-center">
+                                        Showing {Math.min((propagationsPage - 1) * itemsPerPage + 1, propagations.length)}-{Math.min(propagationsPage * itemsPerPage, propagations.length)} of {propagations.length} propagations
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

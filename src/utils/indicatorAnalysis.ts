@@ -168,11 +168,11 @@ export function extractTrendIndicators(
                     break;
                 }
 
-                const initialFreqPredictions = allPredictions[sortedTimeframes[currentTimeframeIndex]] || [];
+                const currentChainFreqPredictions = allPredictions[sortedTimeframes[currentChainTimeframeIndex]] || [];
                 const opposingSignalValue = -currentType;
                 const nextSignalTime = nextSignalDatetime.getTime();
 
-                const opposingSignalFound = initialFreqPredictions.some(pred => {
+                const opposingSignalFound = currentChainFreqPredictions.some(pred => {
                     const predTime = new Date(pred.datetime).getTime();
                     return predTime > currentChainTime &&
                            predTime <= nextSignalTime &&

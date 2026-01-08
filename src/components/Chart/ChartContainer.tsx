@@ -247,6 +247,11 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         if (selectedPropagationLevel !== null && propagations.length > 0) {
+            // When propagation level filtering is active, we need to:
+            // 1. Identify complete chains (using ALL propagations)
+            // 2. Show all predictions from qualifying chains, regardless of timeframe selection
+            // This ensures chains remain consistent when switching propagation levels
+
             // Step 1: Build complete chain structure using ALL propagations (unfiltered)
             const propagationIdToMaxLevel = new Map<string, number>();
             propagations.forEach(prop => {
@@ -263,10 +268,11 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
 
             const filteredPropagationSet = new Set(filteredPropagationIds);
 
-            // Step 3: Build valid prediction keys using COMPLETE propagations (not display-filtered)
-            // This ensures chain membership is consistent regardless of display filters
+            // Step 3: Build valid prediction keys using COMPLETE propagations
+            // This bypasses timeframe filtering to ensure complete chains are shown
             const validPredictionKeys = new Set<string>();
 
+            // Add all propagation events from qualifying chains
             propagations.forEach(prop => {
                 if (filteredPropagationSet.has(prop.propagation_id)) {
                     validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
@@ -278,7 +284,6 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 const match = propId.match(/^Chain_(\d+)$/);
                 if (match) {
                     const chainNumber = parseInt(match[1], 10);
-                    // Use complete initialIndicators list, not display-filtered
                     if (chainNumber > 0 && chainNumber <= initialIndicators.length) {
                         const initialInd = initialIndicators[chainNumber - 1];
                         validPredictionKeys.add(`${initialInd.datetime}|${initialInd.timeframe}|${initialInd.trend_type}`);
@@ -286,9 +291,20 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 }
             });
 
-            // Step 5: Filter predictions by chain membership
-            // The timeframe/date filtering already happened above, so this just filters by chain
-            filtered = filtered.filter(pred => {
+            // Step 5: Go back to the ORIGINAL unfiltered prediction list and filter by chain membership
+            // This bypasses the timeframe filtering for predictions in qualifying chains
+            filtered = preds.filter(pred => {
+                // First check if it passes date filtering
+                if (startDate || endDate) {
+                    const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
+                    const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
+                    const predDate = new Date(pred.datetime.replace(' ', 'T') + 'Z');
+                    if (predDate < start || predDate > end) {
+                        return false;
+                    }
+                }
+
+                // Then check chain membership
                 const predKey = `${pred.datetime}|${pred.timeframeId}|${pred.value}`;
                 return validPredictionKeys.has(predKey);
             });

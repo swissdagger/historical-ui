@@ -167,39 +167,29 @@ const Dashboard: React.FC = () => {
             return { initialIndicators: [], propagations: [], maxPropagationLevel: 0 };
         }
 
-        if (selectedTimeframes.length === 0) {
+        if (availableTimeframes.length === 0) {
             return { initialIndicators: [], propagations: [], maxPropagationLevel: 0 };
         }
 
         const filteredPredictions = { ...allPredictionsData[currentFileId] };
         const csvData = getCSVData(currentFileId);
 
-        const result = extractTrendIndicators(filteredPredictions, selectedTimeframes, csvData);
+        // IMPORTANT: Always use ALL available timeframes for propagation analysis
+        // This ensures chain levels remain stable regardless of display filters
+        const result = extractTrendIndicators(filteredPredictions, availableTimeframes, csvData);
 
-        let filteredInitialIndicators = result.initialIndicators;
-        let filteredPropagations = result.propagations;
-
-        if (startDate || endDate) {
-            const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
-            const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
-
-            filteredInitialIndicators = filteredInitialIndicators.filter(ind => {
-                const indDate = new Date(ind.datetime.replace(' ', 'T') + 'Z');
-                return indDate >= start && indDate <= end;
-            });
-
-            filteredPropagations = filteredPropagations.filter(prop => {
-                const propDate = new Date(prop.datetime.replace(' ', 'T') + 'Z');
-                return propDate >= start && propDate <= end;
-            });
-        }
-
-        const maxLevel = filteredPropagations.reduce((max, prop) =>
+        // Don't filter by date here - let ChartContainer handle display filtering
+        // This keeps the complete propagation data structure intact
+        const maxLevel = result.propagations.reduce((max, prop) =>
             Math.max(max, prop.propagation_level), 0
         );
 
-        return { initialIndicators: filteredInitialIndicators, propagations: filteredPropagations, maxPropagationLevel: maxLevel };
-    }, [currentFileId, allPredictionsData, startDate, endDate, selectedTimeframes, availableTimeframes]);
+        return {
+            initialIndicators: result.initialIndicators,
+            propagations: result.propagations,
+            maxPropagationLevel: maxLevel
+        };
+    }, [currentFileId, allPredictionsData, availableTimeframes]);
 
     return (
         <div className="bg-[#242424]">

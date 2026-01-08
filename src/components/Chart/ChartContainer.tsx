@@ -184,6 +184,46 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
     const [arrowPositions, setArrowPositions] = useState<ArrowPosition[]>([]);
     const [isMobile, setIsMobile] = useState(false);
 
+    // Filter propagations and initial indicators by date and timeframe for display only
+    const { displayPropagations, displayInitialIndicators } = useMemo(() => {
+        let filteredProps = propagations;
+        let filteredInits = initialIndicators;
+
+        // Filter by date range
+        if (startDate || endDate) {
+            const start = startDate ? (parseCustomDateTime(startDate) || new Date(0)) : new Date(0);
+            const end = endDate ? (parseCustomDateTime(endDate) || new Date(8640000000000000)) : new Date(8640000000000000);
+
+            filteredProps = filteredProps.filter(prop => {
+                const propDate = new Date(prop.datetime.replace(' ', 'T') + 'Z');
+                return propDate >= start && propDate <= end;
+            });
+
+            filteredInits = filteredInits.filter(ind => {
+                const indDate = new Date(ind.datetime.replace(' ', 'T') + 'Z');
+                return indDate >= start && indDate <= end;
+            });
+        }
+
+        // Filter by selected timeframes (both higher_freq and lower_freq for propagations)
+        if (selectedTimeframes && selectedTimeframes.length > 0) {
+            const timeframeSet = new Set(selectedTimeframes);
+
+            filteredProps = filteredProps.filter(prop =>
+                timeframeSet.has(prop.higher_freq) && timeframeSet.has(prop.lower_freq)
+            );
+
+            filteredInits = filteredInits.filter(ind =>
+                timeframeSet.has(ind.timeframe)
+            );
+        }
+
+        return {
+            displayPropagations: filteredProps,
+            displayInitialIndicators: filteredInits
+        };
+    }, [propagations, initialIndicators, startDate, endDate, selectedTimeframes]);
+
     const filterPredictionsByDateAndTimeframe = useCallback((preds: PredictionEntry[]): PredictionEntry[] => {
         let filtered = preds;
 
@@ -206,7 +246,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
             filtered = filtered.filter(pred => timeframeSet.has(pred.timeframeId));
         }
 
-        if (selectedPropagationLevel !== null && propagations.length > 0) {
+        if (selectedPropagationLevel !== null && displayPropagations.length > 0) {
+            // Build map using the COMPLETE propagations (not display-filtered) to preserve chain integrity
             const propagationIdToMaxLevel = new Map<string, number>();
 
             propagations.forEach(prop => {
@@ -221,7 +262,8 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 .map(([id, _]) => id);
 
             const filteredPropagationSet = new Set(filteredPropagationIds);
-            const validPropagations = propagations.filter(prop =>
+            // Use display-filtered propagations for building the valid prediction keys
+            const validPropagations = displayPropagations.filter(prop =>
                 filteredPropagationSet.has(prop.propagation_id)
             );
 
@@ -231,12 +273,17 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
                 validPredictionKeys.add(`${prop.datetime}|${prop.lower_freq}|${prop.trend_type}`);
             });
 
+            // Match current Chain_X format (not old Prop_X format)
             filteredPropagationIds.forEach(propId => {
-                const match = propId.match(/^Prop_(\d+)$/);
+                const match = propId.match(/^Chain_(\d+)$/);
                 if (match) {
-                    const index = parseInt(match[1], 10) - 1;
-                    if (index >= 0 && index < initialIndicators.length) {
-                        const initialInd = initialIndicators[index];
+                    const chainNumber = parseInt(match[1], 10);
+                    // Find initial indicator with matching chain ID in display-filtered list
+                    const initialInd = displayInitialIndicators.find((ind, idx) => {
+                        // Chain_1 corresponds to first initial indicator, etc.
+                        return idx + 1 === chainNumber;
+                    });
+                    if (initialInd) {
                         validPredictionKeys.add(`${initialInd.datetime}|${initialInd.timeframe}|${initialInd.trend_type}`);
                     }
                 }
@@ -249,7 +296,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
         }
 
         return filtered;
-    }, [selectedTimeframes, startDate, endDate, selectedPropagationLevel, propagations, initialIndicators]);
+    }, [selectedTimeframes, startDate, endDate, selectedPropagationLevel, propagations, displayPropagations, displayInitialIndicators]);
 
     const filterKlinesByDateRange = useCallback((klines: CandlestickData[]): CandlestickData[] => {
         if (!startDate && !endDate) {
